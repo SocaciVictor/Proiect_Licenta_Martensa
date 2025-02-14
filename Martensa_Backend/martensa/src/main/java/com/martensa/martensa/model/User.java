@@ -1,23 +1,22 @@
 package com.martensa.martensa.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import com.martensa.martensa.model.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 
 @Entity
 @Getter
@@ -32,18 +31,50 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Size(max = 20)
+    @NotBlank
+    @Column(unique = true, nullable = false, name = "user_name")
+    private String username;
+
+    @Setter
+    @Size(max = 120)
+    @NotBlank
+    @Email
+    @Column(unique = true, nullable = false, name = "email")
     private String email;
+
+    @Size(max = 120)
     private String password;
-    private String loyaltyCardNumber;
+
+    @OneToOne
+    private LoyaltyCard loyaltyCard;
+
     private String address;
     private String phoneNumber;
     private LocalDate dateOfBirth;
-    private String preferences;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    @Column(name="isOAuthAccount")
+    private Boolean isOAuthAccount;
+
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
 
      @OneToMany(mappedBy = "user")
     private List<Order> orders;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    public User(String email, String username, String encode) {
+        this.username = username;
+        this.email = email;
+        this.password = encode;
+    }
+
 }

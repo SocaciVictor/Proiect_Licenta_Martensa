@@ -3,7 +3,11 @@ package com.martensa.martensa.model;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.martensa.martensa.model.enums.PromotionType;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +40,9 @@ public class Promotion {
     private LocalDate startDate;
     private LocalDate endDate;
     private int discountPercentage;
+
+    @Enumerated(EnumType.STRING)
+    private PromotionType role;
 
     @ManyToMany
     @JoinTable(
