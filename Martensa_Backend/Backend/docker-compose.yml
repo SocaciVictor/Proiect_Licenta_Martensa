@@ -1,0 +1,86 @@
+services:
+  userServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword1
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: password1
+    ports:
+      - "3312:3306"
+    volumes:
+      - userdb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  productServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword2
+      MYSQL_DATABASE: productdb
+      MYSQL_USER: user2
+      MYSQL_PASSWORD: password2
+    ports:
+      - "3307:3306"
+    volumes:
+      - productdb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  cartServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword3
+      MYSQL_DATABASE: cartdb
+      MYSQL_USER: user3
+      MYSQL_PASSWORD: password3
+    ports:
+      - "3308:3306"
+    volumes:
+      - cartdb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  orderServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword4
+      MYSQL_DATABASE: orderdb
+      MYSQL_USER: user4
+      MYSQL_PASSWORD: password4
+    ports:
+      - "3309:3306"
+    volumes:
+      - orderdb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  storeServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword5
+      MYSQL_DATABASE: storedb
+      MYSQL_USER: user5
+      MYSQL_PASSWORD: password5
+    ports:
+      - "3310:3306"
+    volumes:
+      - storedb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  paymentServiceDB:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword6
+      MYSQL_DATABASE: paymentdb
+      MYSQL_USER: user6
+      MYSQL_PASSWORD: password6
+    ports:
+      - "3311:3306"
+    volumes:
+      - paymentdb_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  userdb_data:
+  productdb_data:
+  cartdb_data:
+  orderdb_data:
+  storedb_data:
+  paymentdb_data:
