@@ -77,6 +77,15 @@ services:
       - paymentdb_data:/var/lib/mysql
     restart: unless-stopped
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
 volumes:
   userdb_data:
   productdb_data:

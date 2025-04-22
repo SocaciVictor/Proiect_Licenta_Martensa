@@ -11,6 +11,7 @@ import com.martensa.userService.dto.request.OrderDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,10 +30,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(max = 20)
-    @NotBlank
-    @Column(unique = true, nullable = false, name = "username")
-    private String username;
+    @NotBlank(message = "Prenumele nu poate fi gol.")
+    @Size(min = 2, max = 50, message = "Prenumele trebuie să aibă între 2 și 50 de caractere.")
+    @Pattern(regexp = "^[A-ZĂÂÎȘȚa-zăâîșț\\- ]+$", message = "Prenumele poate conține doar litere, cratime și spații.")
+    @Column(name = "first_name", nullable = false, length = 50)
+    private String firstName;
+
+    @NotBlank(message = "Numele nu poate fi gol.")
+    @Size(min = 2, max = 50, message = "Numele trebuie să aibă între 2 și 50 de caractere.")
+    @Pattern(regexp = "^[A-ZĂÂÎȘȚa-zăâîșț\\- ]+$", message = "Numele poate conține doar litere, cratime și spații.")
+    @Column(name = "last_name", nullable = false, length = 50)
+    private String lastName;
 
     @Setter
     @Size(max = 120)
@@ -41,6 +49,7 @@ public class User {
     @Column(unique = true, nullable = false, name = "email")
     private String email;
 
+    @Setter
     @Size(max = 120)
     private String password;
 
@@ -61,6 +70,7 @@ public class User {
     @Transient
     private List<OrderDTO> ordersId;
 
+    @Setter
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
     @JoinTable(
             name = "user_roles",
@@ -70,9 +80,23 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     public User(String email, String username, String encode) {
-        this.username = username;
         this.email = email;
         this.password = encode;
     }
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
 
 }

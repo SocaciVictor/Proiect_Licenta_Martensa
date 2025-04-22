@@ -1,15 +1,15 @@
 package com.martensa.userService.service;
 
 
+import com.martensa.userService.dto.request.UserDto;
+import com.martensa.userService.dto.request.UserRequest;
 import com.martensa.userService.model.User;
+import jakarta.validation.Valid;
 
 import java.util.Optional;
 
 public interface UserService {
-    Optional<User> findByUsername(String username);
+    void createUser(@Valid UserDto userDTO);
 
-
-    User register(User user);
-
-    String verify(User user);
+    UserDto getUserByEmail(String email);
 }

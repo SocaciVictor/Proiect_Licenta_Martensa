@@ -1,7 +1,11 @@
 package com.martensa.userService.controller;
 
-import com.martensa.userService.model.User;
+import com.martensa.userService.dto.request.UserDto;
+import com.martensa.userService.dto.request.UserRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.martensa.userService.service.UserService;
@@ -10,7 +14,7 @@ import com.martensa.userService.service.UserService;
 
 @RestController
 @CrossOrigin
-@RequestMapping(path = "/api/users")
+@RequestMapping(path = "/users")
 public class UserController {
 
     private final UserService userService;
@@ -20,18 +24,16 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/hello")
-    public String getHello() {
-        return "Hello";
+    @PostMapping
+    public ResponseEntity<Void> createUser(@RequestBody @Valid UserDto userDto) {
+        userService.createUser(userDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.register(user);
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+        UserDto user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/login")
-    public String login(@RequestBody User user) {
-        return userService.verify(user);
-    }
 }
