@@ -1,27 +1,22 @@
 package org.demo.authservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record UserDto(
-        @NotBlank(message = "Email is required")
-        @Email(message = "Invalid email format")
-        String email,
 
-        @NotBlank(message = "Encrypted password is required")
-        String encryptedPassword,
+        @NotBlank String email,
+        @NotBlank String password,
+        @NotBlank String firstName,
+        @NotBlank String lastName,
+        @NotBlank String address,
+        @NotBlank String phoneNumber,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        @NotNull LocalDate dateOfBirth,
+        List<String> roles
 
-        @NotBlank(message = "First name is required")
-        String firstName,
-
-        @NotBlank(message = "Last name is required")
-        String lastName,
-
-        @NotBlank(message = "Address is required")
-        String address,
-
-        @NotNull(message = "Role is required")
-        List<@NotBlank String> roles
 ) {}
 

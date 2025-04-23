@@ -2,6 +2,7 @@ package com.martensa.userService.controller;
 
 import com.martensa.userService.dto.request.UserDto;
 import com.martensa.userService.dto.request.UserRequest;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Observed(name = "user.create")
     @PostMapping
     public ResponseEntity<Void> createUser(@RequestBody @Valid UserDto userDto) {
         userService.createUser(userDto);

@@ -53,7 +53,8 @@ public class User {
     @Size(max = 120)
     private String password;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "loyalty_card_id")
     private LoyaltyCard loyaltyCard;
 
     private String address;
@@ -71,7 +72,7 @@ public class User {
     private List<OrderDTO> ordersId;
 
     @Setter
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -79,7 +80,7 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    public User(String email, String username, String encode) {
+    public User(String email, String encode) {
         this.email = email;
         this.password = encode;
     }

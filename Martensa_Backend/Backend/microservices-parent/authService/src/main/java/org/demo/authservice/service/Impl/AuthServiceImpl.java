@@ -28,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     public String register(RegisterRequest registerRequest) {
         String encryptedPassword = passwordEncoder.encode(registerRequest.password());
         UserDto userDto = userMapper.toUserDto(registerRequest, encryptedPassword);
+        System.out.println(userDto);
         userClient.createUser(userDto);
 
         List<String> roles = List.of("ROLE_CUSTOMER");
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        boolean passwordMatches = passwordEncoder.matches(request.password(), userDto.encryptedPassword());
+        boolean passwordMatches = passwordEncoder.matches(request.password(), userDto.password());
         if (!passwordMatches) {
             throw new BadCredentialsException("Invalid password");
         }

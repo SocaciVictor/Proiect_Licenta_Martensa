@@ -9,21 +9,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Named;
 
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "encryptedPassword")
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToEntities")
+    @Mappings({
+            @Mapping(target = "email", source = "email"),
+            @Mapping(target = "password", source = "password"),
+            @Mapping(target = "firstName", source = "firstName"),
+            @Mapping(target = "lastName", source = "lastName"),
+            @Mapping(target = "address", source = "address"),
+            @Mapping(target = "phoneNumber", source = "phoneNumber"),
+            @Mapping(target = "dateOfBirth", source = "dateOfBirth"),
+            @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToEntities")
+    })
     User toEntity(UserDto dto);
 
-    @Mapping(target = "encryptedPassword", source = "password")
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToStrings")
+    @Mappings({
+            @Mapping(target = "password", source = "password"),
+            @Mapping(target = "email", source = "email"),
+            @Mapping(target = "firstName", source = "firstName"),
+            @Mapping(target = "lastName", source = "lastName"),
+            @Mapping(target = "address", source = "address"),
+            @Mapping(target = "phoneNumber", source = "phoneNumber"),
+            @Mapping(target = "dateOfBirth", source = "dateOfBirth"),
+            @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToStrings")
+    })
     UserDto toDto(User user);
 
     @Named("mapRolesToEntities")

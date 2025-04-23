@@ -1,8 +1,10 @@
 package org.demo.authservice.dto;
 
 import jakarta.validation.constraints.*;
+import java.time.LocalDate;
 
 public record RegisterRequest(
+
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email format")
         String email,
@@ -18,6 +20,15 @@ public record RegisterRequest(
         String lastName,
 
         @NotBlank(message = "Address is required")
-        String address
+        String address,
+
+        @NotBlank(message = "Phone number is required")
+        @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Phone number must be valid")
+        String phoneNumber,
+
+        @NotNull(message = "Date of birth is required")
+        @Past(message = "Date of birth must be in the past")
+        LocalDate dateOfBirth
+
 ) {}
 
