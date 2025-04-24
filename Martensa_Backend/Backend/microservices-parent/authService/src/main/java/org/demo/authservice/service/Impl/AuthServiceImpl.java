@@ -7,6 +7,7 @@ import org.demo.authservice.dto.UserDto;
 import org.demo.authservice.feign.UserClient;
 import org.demo.authservice.mapper.UserMapper;
 import org.demo.authservice.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,4 +57,9 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.isTokenValid(token);
     }
 
+    @Override
+    public String getToken(String email) {
+        UserDto userDto = userClient.getUserByEmail(email);
+        return jwtService.generateToken(userDto.email(), userDto.roles());
+    }
 }

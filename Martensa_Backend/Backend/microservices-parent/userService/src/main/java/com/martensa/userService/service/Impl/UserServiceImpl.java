@@ -6,6 +6,7 @@ import com.martensa.userService.exception.UserAlreadyExistsException;
 import com.martensa.userService.exception.UsernameNotFoundException;
 import com.martensa.userService.mapper.UserMapper;
 import com.martensa.userService.model.LoyaltyCard;
+import com.martensa.userService.model.LoyaltyCardNumberGenerator;
 import com.martensa.userService.model.Role;
 import com.martensa.userService.model.User;
 import com.martensa.userService.model.enums.UserRole;
@@ -56,6 +57,7 @@ public class UserServiceImpl implements UserService {
 
         LoyaltyCard loyaltyCard = new LoyaltyCard();
         loyaltyCard.setUser(user);
+        loyaltyCard.setCardNumber(LoyaltyCardNumberGenerator.generateCardNumber());
         user.setLoyaltyCard(loyaltyCard);
 
         userRepository.save(user);
