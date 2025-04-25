@@ -18,12 +18,17 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public String generateToken(String email, List<String> roles) {
+    public String generateToken(String email, List<String> roles, String tokenType) {
+
+        long expMillis = "ACCESS".equalsIgnoreCase(tokenType)
+                ? Long.parseLong("86488") * 1000
+                : Long.parseLong("86488") * 1000 * 5;
+
         return Jwts.builder()
                 .setSubject(email)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() * expMillis))
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
                 .compact();
     }
@@ -55,7 +60,7 @@ public class JwtService {
                     .toList();
         }
 
-        return List.of(); // fallback gol
+        return List.of();
     }
 
 

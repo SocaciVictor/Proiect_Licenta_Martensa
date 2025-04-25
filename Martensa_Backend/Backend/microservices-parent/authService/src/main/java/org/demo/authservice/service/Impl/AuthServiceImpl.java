@@ -1,13 +1,14 @@
 package org.demo.authservice.service.Impl;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.authservice.dto.AuthResponse;
 import org.demo.authservice.dto.LoginRequest;
 import org.demo.authservice.dto.RegisterRequest;
 import org.demo.authservice.dto.UserDto;
 import org.demo.authservice.feign.UserClient;
 import org.demo.authservice.mapper.UserMapper;
 import org.demo.authservice.service.AuthService;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,19 +27,21 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public String register(RegisterRequest registerRequest) {
+    public AuthResponse register(RegisterRequest registerRequest) {
         String encryptedPassword = passwordEncoder.encode(registerRequest.password());
         UserDto userDto = userMapper.toUserDto(registerRequest, encryptedPassword);
         System.out.println(userDto);
         userClient.createUser(userDto);
 
         List<String> roles = List.of("ROLE_CUSTOMER");
+        String accessToken = jwtService.generateToken(registerRequest.email(), roles, "ACCESS");
+        String refreshToken = jwtService.generateToken(registerRequest.email(), roles, "REFRESH");
 
-        return jwtService.generateToken(registerRequest.email(), roles);
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         UserDto userDto = userClient.getUserByEmail(request.email());
         if (userDto == null) {
             throw new UsernameNotFoundException("User not found");
@@ -49,7 +52,10 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Invalid password");
         }
 
-        return jwtService.generateToken(userDto.email(), userDto.roles());
+        String accessToken = jwtService.generateToken(userDto.email(), userDto.roles(), "ACCESS");
+        String refreshToken = jwtService.generateToken(userDto.email(), userDto.roles(), "REFRESH");
+
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
@@ -58,8 +64,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String getToken(String email) {
+    public AuthResponse getToken(String email) {
         UserDto userDto = userClient.getUserByEmail(email);
-        return jwtService.generateToken(userDto.email(), userDto.roles());
+        String accessToken = jwtService.generateToken(userDto.email(), userDto.roles(), "ACCESS");
+        String refreshToken = jwtService.generateToken(userDto.email(), userDto.roles(), "REFRESH");
+        return new AuthResponse(accessToken, refreshToken);
     }
 }

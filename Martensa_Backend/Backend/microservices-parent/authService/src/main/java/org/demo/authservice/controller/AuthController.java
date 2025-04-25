@@ -1,7 +1,7 @@
 package org.demo.authservice.controller;
 
-import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
+import org.demo.authservice.dto.AuthResponse;
 import org.demo.authservice.dto.LoginRequest;
 import org.demo.authservice.dto.RegisterRequest;
 import org.demo.authservice.dto.UserTokenDto;
@@ -28,33 +28,33 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
-        String token = authService.register(request);
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        AuthResponse token = authService.register(request);
         return ResponseEntity.ok(token);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
-        String token = authService.login(request);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse token = authService.login(request);
         return ResponseEntity.ok(token);
     }
 
     @GetMapping("/token")
-    public ResponseEntity<String> getToken(@Valid @RequestBody UserTokenDto request) {
-        String token = authService.getToken(request.email());
+    public ResponseEntity<AuthResponse> getToken(@Valid @RequestBody UserTokenDto request) {
+        AuthResponse token = authService.getToken(request.email());
         return ResponseEntity.ok(token);
     }
 
 
     @PostMapping("/validate")
-    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String tokenHeader) {
+    public ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String tokenHeader) {
         String token = tokenHeader.replace("Bearer ", "");
         boolean isValid = authService.validateToken(token);
 
         if (isValid) {
-            return ResponseEntity.ok("Token is valid");
+            return ResponseEntity.ok(Boolean.TRUE);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Boolean.FALSE);
         }
     }
 
