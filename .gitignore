@@ -33,3 +33,63 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Expo ###
+# Node modules
+node_modules/
+
+# Fișiere de build
+.expo/
+web-build/
+dist/
+build/
+
+# Fișiere de log și cache
+npm-debug.log*
+yarn-error.log*
+.expo-shared/assets.json
+.expo-shared/metadata.json
+
+# Fișiere de configurare locale
+.env
+.env.local
+.env.*.local
+
+# Fișiere temporare
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.swn
+*.swm
+
+# Configurații IDE
+.vscode/
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Android
+android/
+*.apk
+*.aar
+*.hprof
+
+# iOS
+ios/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.xcuserstate
+*.xcworkspace
+Pods/
+Podfile.lock
+
+# Alte fișiere generate
+*.expo
+
