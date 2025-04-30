@@ -49,7 +49,6 @@ public class User {
     @Column(unique = true, nullable = false, name = "email")
     private String email;
 
-    @Setter
     @Size(max = 120)
     private String password;
 
@@ -71,7 +70,6 @@ public class User {
     @Transient
     private List<OrderDTO> ordersId;
 
-    @Setter
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(
             name = "user_roles",

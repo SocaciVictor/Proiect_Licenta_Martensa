@@ -30,7 +30,6 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest registerRequest) {
         String encryptedPassword = passwordEncoder.encode(registerRequest.password());
         UserDto userDto = userMapper.toUserDto(registerRequest, encryptedPassword);
-        System.out.println(userDto);
         userClient.createUser(userDto);
 
         List<String> roles = List.of("ROLE_CUSTOMER");

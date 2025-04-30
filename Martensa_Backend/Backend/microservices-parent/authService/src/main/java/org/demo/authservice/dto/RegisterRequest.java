@@ -2,6 +2,7 @@ package org.demo.authservice.dto;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 
 public record RegisterRequest(
 
@@ -28,7 +29,9 @@ public record RegisterRequest(
 
         @NotNull(message = "Date of birth is required")
         @Past(message = "Date of birth must be in the past")
-        LocalDate dateOfBirth
+        LocalDate dateOfBirth,
+
+        List<String>roles
 
 ) {}
 
