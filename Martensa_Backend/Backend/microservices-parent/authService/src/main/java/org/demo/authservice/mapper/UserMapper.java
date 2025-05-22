@@ -15,8 +15,7 @@ public interface UserMapper {
             @Mapping(target = "lastName", source = "lastName"),
             @Mapping(target = "address", source = "address"),
             @Mapping(target = "phoneNumber", source = "phoneNumber"),
-            @Mapping(target = "dateOfBirth", source = "dateOfBirth"),
-            @Mapping(target = "roles", expression = "java(java.util.List.of(\"ROLE_CUSTOMER\"))")
+            @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     })
     UserDto toUserDto(RegisterRequest request, @Context String encryptedPassword);
 }

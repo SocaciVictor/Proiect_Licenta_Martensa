@@ -28,7 +28,7 @@ public class Promotion {
     private int discountPercentage;
 
     @Enumerated(EnumType.STRING)
-    private PromotionType role;
+    private PromotionType promotionType;
 
     @ManyToMany
     @JoinTable(

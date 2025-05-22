@@ -23,7 +23,39 @@ spring:
             - Path=/users/**
           filters:
             - name: Authentication
+
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/auth/**
+
+        - id: productservice
+          uri: lb://productservice
+          predicates:
+            - Path=/products/**
+          filters:
+            - name: Authentication
+              args:
+                requiredRoles: ROLE_ADMIN
+                securedMethods: POST,PUT,DELETE
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: Authentication
+
+        - id: store-service
+          uri: lb://store-service
+          predicates:
+            - Path=/stores/**
+          filters:
+            - name: Authentication
+
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/carts/**
+          filters:
+            - name: Authentication

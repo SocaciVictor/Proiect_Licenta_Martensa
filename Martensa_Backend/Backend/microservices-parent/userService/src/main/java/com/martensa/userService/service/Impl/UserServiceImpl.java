@@ -19,6 +19,7 @@ import com.martensa.userService.repository.UserRepository;
 import com.martensa.userService.service.UserService;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -50,10 +51,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setIsOAuthAccount(false);
 
-        Role customerRole = roleRepository.findByRoleName(UserRole.ROLE_CUSTOMER)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Set<Role> roles = userDTO.roles().stream()
+                .map(String::toUpperCase)
+                .map(UserRole::valueOf)
+                .map(roleEnum -> roleRepository.findByRoleName(roleEnum)
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleEnum)))
+                .collect(Collectors.toSet());
 
-        user.setRoles(Set.of(customerRole));
+        user.setRoles(roles);
 
         LoyaltyCard loyaltyCard = new LoyaltyCard();
         loyaltyCard.setUser(user);

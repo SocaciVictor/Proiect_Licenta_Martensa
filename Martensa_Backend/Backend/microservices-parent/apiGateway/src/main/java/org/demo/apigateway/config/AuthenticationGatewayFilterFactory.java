@@ -56,9 +56,20 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                             }
 
                             Claims claims = jwtUtil.extractAllClaims(token);
+                            List<String> roles = (List<String>) claims.get("roles");
+
+                            // Verificare rol doar pentru metode sensibile
+                            String method = request.getMethod() != null ? request.getMethod().name() : "";
+                            if (List.of("POST", "PUT", "DELETE").contains(method)) {
+                                if (roles == null || !roles.contains("ROLE_ADMIN")) {
+                                    return onError(finalExchange, "Acces interzis – rolul ADMIN este necesar", HttpStatus.FORBIDDEN);
+                                }
+                            }
+
+
                             ServerHttpRequest mutatedRequest = finalExchange.getRequest().mutate()
                                     .header("email", claims.getSubject())
-                                    .header("roles", String.join(",", (List<String>) claims.get("roles")))
+                                    .header("roles", String.join(",", roles))
                                     .build();
                             ServerWebExchange mutatedExchange = finalExchange.mutate().request(mutatedRequest).build();
 
@@ -69,6 +80,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             return chain.filter(exchange);
         };
     }
+
 
 
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
