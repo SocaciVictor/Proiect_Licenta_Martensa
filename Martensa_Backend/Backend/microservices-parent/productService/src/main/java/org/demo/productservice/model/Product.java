@@ -6,9 +6,10 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Builder
 @Table(name = "PRODUCT")
 public class Product {

@@ -2,6 +2,10 @@ package com.martensa.userService.service.Impl;
 
 import com.martensa.userService.dto.request.UserDto;
 
+import com.martensa.userService.dto.request.UserUpdateRequest;
+import com.martensa.userService.dto.response.LoyaltyCardResponse;
+import com.martensa.userService.dto.response.UserProfileResponse;
+import com.martensa.userService.dto.response.UserSummaryResponse;
 import com.martensa.userService.exception.UserAlreadyExistsException;
 import com.martensa.userService.exception.UsernameNotFoundException;
 import com.martensa.userService.mapper.UserMapper;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.martensa.userService.repository.UserRepository;
 import com.martensa.userService.service.UserService;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,4 +80,55 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return userMapper.toDto(user);
     }
+
+    @Override
+    public UserProfileResponse getProfileByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+
+        return userMapper.toUserProfile(user);
+    }
+
+    @Override
+    public LoyaltyCardResponse getLoyaltyCard(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+
+        LoyaltyCard card = user.getLoyaltyCard();
+        return new LoyaltyCardResponse(card.getCardNumber(), card.getPoints());
+    }
+
+    @Override
+    public void updateUser(String email, UserUpdateRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+
+        userMapper.updateUserFromRequest(request, user);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+        userRepository.delete(user);
+    }
+
+    @Override
+    public List<UserSummaryResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toUserSummary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserProfileResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User with id " + id + " not found"));
+        return userMapper.toUserProfile(user);
+    }
+
+
+
 }

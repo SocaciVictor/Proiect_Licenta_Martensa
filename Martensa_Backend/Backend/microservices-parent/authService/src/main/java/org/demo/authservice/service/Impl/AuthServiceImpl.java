@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
         UserDto userDto = userMapper.toUserDto(registerRequest, encryptedPassword);
         userClient.createUser(userDto);
 
-        List<String> roles = List.of("ROLE_CUSTOMER");
+        List<String> roles = userDto.roles();
         String accessToken = jwtService.generateToken(registerRequest.email(), roles, "ACCESS");
         String refreshToken = jwtService.generateToken(registerRequest.email(), roles, "REFRESH");
 
