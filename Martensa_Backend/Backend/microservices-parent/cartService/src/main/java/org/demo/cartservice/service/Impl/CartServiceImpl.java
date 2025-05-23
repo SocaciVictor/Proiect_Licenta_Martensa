@@ -1,5 +1,6 @@
 package org.demo.cartservice.service.Impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.demo.cartservice.dto.ProductDto;
 import org.demo.cartservice.dto.UserDto;
@@ -34,7 +35,14 @@ public class CartServiceImpl implements CartService {
         Long userId = user.id();
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(userId));
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                            .userId(userId)
+                            .productsID(new java.util.ArrayList<>())
+                            .build();
+                    return cartRepository.save(newCart);
+                });
+
 
         List<ProductDto> products = cart.getProductsID().stream()
                 .map(id -> {
@@ -46,10 +54,11 @@ public class CartServiceImpl implements CartService {
                 })
                 .collect(Collectors.toList());
 
-        return new CartResponse(cart.getId(), userId, products);
+        return new CartResponse(cart.getId(), userId, products, products.isEmpty());
     }
 
     @Override
+    @Transactional
     public void addProduct(String email, AddProductRequest request) {
         UserDto user = userClient.getUserByEmail(email);
         Long userId = user.id();

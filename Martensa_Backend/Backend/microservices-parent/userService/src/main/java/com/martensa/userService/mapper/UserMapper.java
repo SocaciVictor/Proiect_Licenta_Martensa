@@ -20,6 +20,7 @@ import org.mapstruct.*;
 public interface UserMapper {
 
     @Mappings({
+            @Mapping(target = "id", source = "id"),
             @Mapping(target = "email", source = "email"),
             @Mapping(target = "password", source = "password"),
             @Mapping(target = "firstName", source = "firstName"),

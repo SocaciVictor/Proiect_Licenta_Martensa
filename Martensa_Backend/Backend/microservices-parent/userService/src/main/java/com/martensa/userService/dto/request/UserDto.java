@@ -8,6 +8,8 @@ import java.util.List;
 
 public record UserDto(
 
+        @Null
+        Long id,
         @NotBlank String email,
         @NotBlank String password,
         @NotBlank String firstName,

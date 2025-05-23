@@ -5,12 +5,12 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Entity
 @Table(name = "PRODUCT")
 public class Product {
 

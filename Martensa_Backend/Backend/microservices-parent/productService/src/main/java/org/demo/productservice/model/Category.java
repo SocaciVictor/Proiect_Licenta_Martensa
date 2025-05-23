@@ -22,10 +22,6 @@ public class Category {
     private String name;
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_category_id")
-    private Category parentCategory;
-
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 }

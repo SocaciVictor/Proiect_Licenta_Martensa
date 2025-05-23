@@ -13,21 +13,44 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "price", expression = "java(product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice())")
     ProductResponse toProductResponse(Product product);
 
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "brand", source = "brand")
     @Mapping(target = "price", source = "price")
     @Mapping(target = "discountPrice", source = "discountPrice")
+    @Mapping(target = "imageUrl", source = "imageUrl")
+    @Mapping(target = "barcode", source = "barcode")
+    @Mapping(target = "ingredients", source = "ingredients")
+    @Mapping(target = "nutritionalInfo", source = "nutritionalInfo")
+    @Mapping(target = "disclaimer", source = "disclaimer")
+    @Mapping(target = "alcoholPercentage", source = "alcoholPercentage")
     ProductDetailsResponse toProductDetails(Product product);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true) // îl setăm manual în service
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "brand", source = "brand")
+    @Mapping(target = "price", source = "price")
+    @Mapping(target = "discountPrice", source = "discountPrice")
+    @Mapping(target = "imageUrl", source = "imageUrl")
+    @Mapping(target = "barcode", source = "barcode")
+    @Mapping(target = "ingredients", source = "ingredients")
+    @Mapping(target = "nutritionalInfo", source = "nutritionalInfo")
+    @Mapping(target = "disclaimer", source = "disclaimer")
+    @Mapping(target = "alcoholPercentage", source = "alcoholPercentage")
+    @Mapping(target = "category", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true) // îl setăm separat
+    @Mapping(target = "category", ignore = true)
     void updateProductFromRequest(ProductRequest request, @MappingTarget Product product);
-
 
     List<ProductResponse> toProductResponseList(List<Product> products);
 }
