@@ -22,7 +22,8 @@ public class Wishlist {
     private Long userID;
 
     @ElementCollection
-    @CollectionTable(name = "cart_products", joinColumns = @JoinColumn(name = "cart_id"))
+    @CollectionTable(name = "wishlist_products", joinColumns = @JoinColumn(name = "wishlist_id"))
     @Column(name = "product_id")
     private List<Long> productsID = new ArrayList<>();
+
 }

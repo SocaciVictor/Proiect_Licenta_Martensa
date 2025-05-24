@@ -1,13 +1,12 @@
-package org.demo.cartservice.feign;
+package org.demo.orderservice.feign;
 
-import org.demo.cartservice.dto.response.ProductDetailsResponse;
+import org.demo.orderservice.dto.ProductDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "productservice", url = "http://localhost:8081")
+@FeignClient(name = "productservice")
 public interface ProductClient {
-
     @GetMapping("/products/{id}")
-    ProductDetailsResponse getProductById(@PathVariable Long id);
+    ProductDTO getProductById(@PathVariable Long id);
 }

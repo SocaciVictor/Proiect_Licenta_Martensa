@@ -52,10 +52,21 @@ spring:
             - Path=/stores/**
           filters:
             - name: Authentication
+              args:
+                requiredRoles: ROLE_ADMIN
+                securedMethods: POST,PUT,DELETE
+
 
         - id: cart-service
           uri: lb://cart-service
           predicates:
             - Path=/carts/**
+          filters:
+            - name: Authentication
+
+        - id: wishlist-endpoints
+          uri: lb://cart-service
+          predicates:
+            - Path=/wishlist/**
           filters:
             - name: Authentication

@@ -1,18 +1,13 @@
 package org.demo.orderservice.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-public class ProductDTO {
-    private Long id;
-    private String name;
-    private BigDecimal price;
-    private String description;
-
+public record ProductDTO(
+        Long id,
+        String name,
+        BigDecimal price,
+        String description
+) {
 
 }
 

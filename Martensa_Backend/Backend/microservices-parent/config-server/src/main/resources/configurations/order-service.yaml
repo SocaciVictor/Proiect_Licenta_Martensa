@@ -31,3 +31,13 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+order:
+  queue: order.created.queue
+  exchange: order.exchange
+  routing-key: order.created
