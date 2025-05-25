@@ -49,6 +49,12 @@ spring:
             - Path=/orders/**
           filters:
             - name: Authentication
+              args:
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - DELETE
+                  - GET
 
         - id: store-service
           uri: lb://store-service

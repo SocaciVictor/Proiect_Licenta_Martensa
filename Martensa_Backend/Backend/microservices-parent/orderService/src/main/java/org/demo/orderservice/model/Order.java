@@ -34,6 +34,7 @@ public class Order {
     private String paymentMethod;
     private String trackingNumber;
 
-    @Transient // Nu persista in baza de date
-    private List<ProductDTO> products;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items;
+
 }

@@ -1,5 +1,6 @@
 package org.demo.orderservice.dto.response;
 
+import org.demo.orderservice.dto.OrderItemDto;
 import org.demo.orderservice.dto.ProductDTO;
 import org.demo.orderservice.model.enums.OrderStatus;
 
@@ -16,6 +17,6 @@ public record OrderResponse(
         String shippingAddress,
         String paymentMethod,
         String trackingNumber,
-        List<ProductDTO> products
+        List<OrderItemDto> items
 ) {
 }

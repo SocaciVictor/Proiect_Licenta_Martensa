@@ -8,6 +8,8 @@ import org.demo.orderservice.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -27,5 +29,15 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.deleteOrderById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getAllOrders(@RequestHeader("roles") String roles) {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 }
