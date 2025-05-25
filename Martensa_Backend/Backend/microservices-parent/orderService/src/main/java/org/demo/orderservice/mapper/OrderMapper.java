@@ -18,7 +18,8 @@ public interface OrderMapper {
     @Mapping(target = "products", source = "products")
     Order toEntity(OrderRequest request, Long userId, List<ProductDTO> products, @Context java.math.BigDecimal total);
 
-    @Mapping(target = "products", source = "products")
+    @Mapping(target = "orderStatus", source = "order.orderStatus")
     OrderResponse toResponse(Order order);
+
 }
 

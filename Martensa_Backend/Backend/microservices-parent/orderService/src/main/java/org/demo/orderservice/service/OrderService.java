@@ -5,4 +5,6 @@ import org.demo.orderservice.dto.response.OrderResponse;
 
 public interface OrderService {
     OrderResponse placeOrder(OrderRequest request, String email);
+    OrderResponse getOrderById(Long id);
+
 }

@@ -1,6 +1,6 @@
-package org.demo.orderservice;
+package org.demo.paymentservice;
 
-import org.demo.orderservice.config.OrderRabbitProperties;
+import org.demo.paymentservice.config.PaymentRabbitProperties;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,12 +11,12 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@EnableConfigurationProperties(OrderRabbitProperties.class)
+@EnableConfigurationProperties(PaymentRabbitProperties.class)
 @EnableRabbit
-public class OrderServiceApplication {
+public class PaymentServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OrderServiceApplication.class, args);
+        SpringApplication.run(PaymentServiceApplication.class, args);
     }
 
 }

@@ -23,4 +23,9 @@ public class OrderController {
         OrderResponse response = orderService.placeOrder(request, email);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
+    }
 }

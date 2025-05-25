@@ -1,6 +1,5 @@
-package org.demo.orderservice.dto;
+package org.demo.paymentservice.dto;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -10,5 +9,5 @@ public record OrderCreatedEvent(
         BigDecimal totalAmount,
         List<Long> productIds,
         String paymentMethod
-){
+) {
 }

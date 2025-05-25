@@ -1,10 +1,11 @@
 package org.demo.orderservice.service.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.demo.orderservice.dto.request.OrderRequest;
-import org.demo.orderservice.dto.response.OrderResponse;
 import org.demo.orderservice.config.OrderRabbitProperties;
 import org.demo.orderservice.dto.*;
+import org.demo.orderservice.dto.request.OrderRequest;
+import org.demo.orderservice.dto.response.OrderResponse;
+import org.demo.orderservice.exception.OrderNotFoundException;
 import org.demo.orderservice.feign.ProductClient;
 import org.demo.orderservice.feign.UserClient;
 import org.demo.orderservice.mapper.OrderMapper;
@@ -52,8 +53,19 @@ public class OrderServiceImpl implements OrderService {
                 saved.getPaymentMethod()
         );
 
-        rabbitTemplate.convertAndSend(rabbitProps.getExchange(), rabbitProps.getRoutingKey(), event);
+        rabbitTemplate.convertAndSend(
+                rabbitProps.getOrder().getExchange(),
+                rabbitProps.getOrder().getRoutingKey(),
+                event
+        );
 
         return orderMapper.toResponse(saved);
+    }
+
+    @Override
+    public OrderResponse getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        return orderMapper.toResponse(order);
     }
 }

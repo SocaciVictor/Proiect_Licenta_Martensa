@@ -92,8 +92,8 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     @Setter
     @Getter
     public static class Config {
-        private List<String> requiredRoles;
-        private List<String> securedMethods;
-
+        private List<String> requiredRoles = List.of();
+        private List<String> securedMethods = List.of();
     }
+
 }

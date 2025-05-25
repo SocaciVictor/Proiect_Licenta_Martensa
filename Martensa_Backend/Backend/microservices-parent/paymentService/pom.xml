@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.demo</groupId>
-    <artifactId>orderService</artifactId>
+    <artifactId>paymentService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>orderService</name>
-    <description>orderService</description>
+    <name>paymentService</name>
+    <description>paymentService</description>
     <url/>
     <licenses>
         <license/>
@@ -177,5 +177,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

@@ -3,6 +3,7 @@ package org.demo.orderservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.demo.orderservice.dto.ProductDTO;
+import org.demo.orderservice.model.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,7 +27,9 @@ public class Order {
 
     private LocalDate orderDate;
     private BigDecimal totalAmount;
-    private String orderStatus;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
     private String shippingAddress;
     private String paymentMethod;
     private String trackingNumber;

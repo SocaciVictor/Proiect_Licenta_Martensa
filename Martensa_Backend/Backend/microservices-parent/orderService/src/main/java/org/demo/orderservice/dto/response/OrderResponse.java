@@ -1,6 +1,7 @@
 package org.demo.orderservice.dto.response;
 
 import org.demo.orderservice.dto.ProductDTO;
+import org.demo.orderservice.model.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ public record OrderResponse(
         Long userId,
         LocalDate orderDate,
         BigDecimal totalAmount,
-        String orderStatus,
+        OrderStatus orderStatus,
         String shippingAddress,
         String paymentMethod,
         String trackingNumber,

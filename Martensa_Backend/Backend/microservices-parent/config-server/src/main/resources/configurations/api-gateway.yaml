@@ -36,8 +36,12 @@ spring:
           filters:
             - name: Authentication
               args:
-                requiredRoles: ROLE_ADMIN
-                securedMethods: POST,PUT,DELETE
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - POST
+                  - PUT
+                  - DELETE
 
         - id: order-service
           uri: lb://order-service
@@ -53,8 +57,12 @@ spring:
           filters:
             - name: Authentication
               args:
-                requiredRoles: ROLE_ADMIN
-                securedMethods: POST,PUT,DELETE
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - POST
+                  - PUT
+                  - DELETE
 
 
         - id: cart-service
@@ -68,5 +76,11 @@ spring:
           uri: lb://cart-service
           predicates:
             - Path=/wishlist/**
+          filters:
+            - name: Authentication
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payments/**
           filters:
             - name: Authentication
