@@ -93,3 +93,4 @@ Podfile.lock
 # Alte fișiere generate
 *.expo
 
+Martensa_Frontend/app/globals.css
