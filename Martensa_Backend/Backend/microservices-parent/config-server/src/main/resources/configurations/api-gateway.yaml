@@ -16,6 +16,27 @@ eureka:
 spring:
   cloud:
     gateway:
+      # --------- AICI ADĂUGĂM CORS GLOBAL ----------
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            # Originile permise de unde se vor face cereri cross‐origin
+            allowed-origins:
+              - "http://localhost:8093"
+              - "http://192.168.1.13:19006"            # IP-ul local al PC-ului, ex: 192.168.1.7
+              - "exp://192.168.1.13:19000"            # Pentru Expo Go (fizic)
+              - "http://192.168.1.13:19006"       # Dacă accesezi prin IP public (cu port forwarding)
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "*"
+            allow-credentials: true
+            max-age: 3600                   # cache preflight timp de 1 oră
+
       routes:
         - id: user-service
           uri: lb://user-service
@@ -70,7 +91,6 @@ spring:
                   - PUT
                   - DELETE
 
-
         - id: cart-service
           uri: lb://cart-service
           predicates:
@@ -84,6 +104,7 @@ spring:
             - Path=/wishlist/**
           filters:
             - name: Authentication
+
         - id: payment-service
           uri: lb://payment-service
           predicates:

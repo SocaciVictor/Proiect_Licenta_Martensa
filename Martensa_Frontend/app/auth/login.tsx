@@ -1,10 +1,10 @@
-import { SafeAreaView } from "react-native";
-import LoginForm from "../../modules/auth/components/LoginForm";
+import LoginForm from "@/modules/auth/components/LoginForm";
+import { View } from "react-native";
 
 export default function LoginScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 justify-center px-6 bg-white">
       <LoginForm />
-    </SafeAreaView>
+    </View>
   );
 }

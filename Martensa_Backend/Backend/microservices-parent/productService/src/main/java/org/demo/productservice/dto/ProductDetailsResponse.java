@@ -14,6 +14,7 @@ public record ProductDetailsResponse(
         String ingredients,
         String nutritionalInfo,
         String disclaimer,
-        Double alcoholPercentage
+        Double alcoholPercentage,
+        String categoryName
 ) {
 }

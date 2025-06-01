@@ -1,136 +1,66 @@
+// modules/auth/components/LoginForm.tsx
+import { useAuth } from "@/app/context/AuthContext";
+import { LoginRequest } from "@/modules/auth/types/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { login } from "../services/authService";
-import { useAuthStore } from "../store/useAuthStore";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { loginSchema } from "../validation/authSchema";
 
-interface LoginFormValues {
-  email: string;
-  password: string;
-}
-
-const LoginForm: React.FC = () => {
+export default function LoginForm() {
+  const { onLogin } = useAuth();
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   const {
-    control,
+    setValue,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm<LoginRequest>({
     resolver: yupResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setApiError(null);
-    setLoading(true);
-    try {
-      const authResponse = await login(data.email, data.password);
-      // Save token and user in global auth store
-      setAuth(authResponse.token, authResponse.user);
-      // Navigate to products page after successful login
-      router.replace("/products");
-    } catch (error: any) {
-      // Show error message (e.g., invalid credentials or network error)
-      const message =
-        error?.message ||
-        "Autentificare eșuată. Vă rugăm să încercați din nou.";
-      setApiError(message);
-    } finally {
-      setLoading(false);
+  const onSubmit = async (data: LoginRequest) => {
+    const result = await onLogin?.(data);
+    if (result?.token) {
+      router.replace("/"); // Redirect după login
+    } else {
+      setError(result?.msg || "Eroare la autentificare.");
     }
   };
 
   return (
-    <View className="flex-1 justify-center px-4">
-      <Text className="text-2xl font-bold text-center mb-6">Autentificare</Text>
+    <View className="space-y-4 px-6 py-8">
+      <Text className="text-2xl font-bold text-center mb-4">Autentificare</Text>
 
-      {/* Email field */}
-      <View className="mb-4">
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              className="border border-gray-300 rounded px-4 py-2"
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoCorrect={false}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-        {errors.email && (
-          <Text className="text-red-500 text-sm mt-1">
-            {errors.email.message}
-          </Text>
-        )}
-      </View>
+      {error && <Text className="text-red-600">{error}</Text>}
 
-      {/* Password field */}
-      <View className="mb-4">
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              className="border border-gray-300 rounded px-4 py-2"
-              placeholder="Parolă"
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-        {errors.password && (
-          <Text className="text-red-500 text-sm mt-1">
-            {errors.password.message}
-          </Text>
-        )}
-      </View>
-
-      {/* API error message */}
-      {apiError && (
-        <Text className="text-red-500 text-center mb-4">{apiError}</Text>
+      <TextInput
+        placeholder="Email"
+        onChangeText={(text) => setValue("email", text)}
+        className="border border-gray-300 rounded p-3"
+      />
+      {errors.email && (
+        <Text className="text-red-500">{errors.email.message}</Text>
       )}
 
-      {/* Submit button */}
-      <Pressable
-        className={`bg-blue-600 rounded py-3 ${loading ? "opacity-50" : ""}`}
+      <TextInput
+        placeholder="Parolă"
+        secureTextEntry
+        onChangeText={(text) => setValue("password", text)}
+        className="border border-gray-300 rounded p-3"
+      />
+      {errors.password && (
+        <Text className="text-red-500">{errors.password.message}</Text>
+      )}
+
+      <TouchableOpacity
         onPress={handleSubmit(onSubmit)}
-        disabled={loading}
+        className="bg-green-600 p-3 rounded"
       >
-        {loading ? (
-          <ActivityIndicator color="#ffffff" />
-        ) : (
-          <Text className="text-white text-center font-semibold">
-            Autentificare
-          </Text>
-        )}
-      </Pressable>
+        <Text className="text-white text-center">Conectează-te</Text>
+      </TouchableOpacity>
     </View>
   );
-};
-
-export default LoginForm;
+}

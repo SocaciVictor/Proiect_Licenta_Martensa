@@ -31,6 +31,7 @@ public interface ProductMapper {
     @Mapping(target = "nutritionalInfo", source = "nutritionalInfo")
     @Mapping(target = "disclaimer", source = "disclaimer")
     @Mapping(target = "alcoholPercentage", source = "alcoholPercentage")
+    @Mapping(target = "categoryName",     source = "category.name")
     ProductDetailsResponse toProductDetails(Product product);
 
     @Mapping(target = "id", ignore = true)

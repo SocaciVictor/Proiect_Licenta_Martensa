@@ -5,7 +5,7 @@ module.exports = {
     "./app/**/*.{js,jsx,ts,tsx}",
     "./modules/**/*.{js,jsx,ts,tsx}",
     "./components/**/*.{js,jsx,ts,tsx}", // your React/Next files
-    "globals.css",
+    "./globals.css",
   ],
   presets: [require("nativewind/preset")],
   theme: {
