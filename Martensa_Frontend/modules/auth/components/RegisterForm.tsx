@@ -1,94 +1,96 @@
-// modules/auth/components/RegisterForm.tsx
-import { useAuth } from "@/app/context/AuthContext";
-import { RegisterRequest } from "@/modules/auth/types/auth";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { ScrollView, Text, TextInput, TouchableOpacity } from "react-native";
-import { registerSchema } from "../validation/authSchema";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function RegisterForm() {
-  const { onRegister } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+
+  const register = useAuthStore((state) => state.register);
   const router = useRouter();
-  const [error, setError] = useState("");
 
-  const {
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterRequest>({
-    resolver: yupResolver(registerSchema),
-  });
+  const handleRegister = async () => {
+    const payload = {
+      email,
+      password,
+      firstName,
+      lastName,
+      address,
+      phoneNumber,
+      dateOfBirth,
+      roles: ["USER"],
+    };
 
-  const onSubmit = async (data: RegisterRequest) => {
-    const result = await onRegister?.({ ...data, roles: ["ROLE_CUSTOMER"] });
-    if (result?.token) {
-      router.replace("/"); // Redirect după înregistrare
+    const response = await register(payload);
+
+    if (response?.error) {
+      Alert.alert("Eroare", response.msg);
     } else {
-      setError(result?.msg || "Eroare la înregistrare.");
+      router.replace("/(tabs)/profile");
     }
   };
 
   return (
-    <ScrollView
-      className="px-6 py-8"
-      contentContainerStyle={{ paddingBottom: 20 }}
-    >
-      <Text className="text-2xl font-bold text-center mb-4">Înregistrare</Text>
-
-      {error && <Text className="text-red-600">{error}</Text>}
-
-      <TextInput
-        placeholder="Email"
-        onChangeText={(t) => setValue("email", t)}
-        className="border border-gray-300 rounded p-3"
-      />
-      {errors.email && (
-        <Text className="text-red-500">{errors.email.message}</Text>
-      )}
-
-      <TextInput
-        placeholder="Parolă"
-        secureTextEntry
-        onChangeText={(t) => setValue("password", t)}
-        className="border border-gray-300 rounded p-3"
-      />
-      {errors.password && (
-        <Text className="text-red-500">{errors.password.message}</Text>
-      )}
-
+    <View>
       <TextInput
         placeholder="Prenume"
-        onChangeText={(t) => setValue("firstName", t)}
-        className="border border-gray-300 rounded p-3"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={firstName}
+        onChangeText={setFirstName}
       />
       <TextInput
         placeholder="Nume"
-        onChangeText={(t) => setValue("lastName", t)}
-        className="border border-gray-300 rounded p-3"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={lastName}
+        onChangeText={setLastName}
+      />
+      <TextInput
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        placeholder="Parolă"
+        secureTextEntry
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={password}
+        onChangeText={setPassword}
       />
       <TextInput
         placeholder="Adresă"
-        onChangeText={(t) => setValue("address", t)}
-        className="border border-gray-300 rounded p-3"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={address}
+        onChangeText={setAddress}
       />
       <TextInput
-        placeholder="Telefon"
-        onChangeText={(t) => setValue("phoneNumber", t)}
-        className="border border-gray-300 rounded p-3"
+        placeholder="Număr de telefon"
+        keyboardType="phone-pad"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-3"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
       />
       <TextInput
-        placeholder="Data nașterii (yyyy-mm-dd)"
-        onChangeText={(t) => setValue("dateOfBirth", t)}
-        className="border border-gray-300 rounded p-3"
+        placeholder="Data nașterii (YYYY-MM-DD)"
+        className="border border-gray-300 rounded-md px-4 py-2 mb-6"
+        value={dateOfBirth}
+        onChangeText={setDateOfBirth}
       />
+
       <TouchableOpacity
-        onPress={handleSubmit(onSubmit)}
-        className="bg-green-600 p-3 rounded mt-4"
+        onPress={handleRegister}
+        className="bg-green-600 py-3 rounded-lg"
       >
-        <Text className="text-white text-center">Înregistrează-te</Text>
+        <Text className="text-white text-center font-semibold">Register</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 }

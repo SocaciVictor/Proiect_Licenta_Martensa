@@ -1,65 +1,47 @@
 // modules/auth/components/LoginForm.tsx
-import { useAuth } from "@/app/context/AuthContext";
-import { LoginRequest } from "@/modules/auth/types/auth";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { loginSchema } from "../validation/authSchema";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function LoginForm() {
-  const { onLogin } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const login = useAuthStore((state) => state.login);
   const router = useRouter();
-  const [error, setError] = useState("");
 
-  const {
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginRequest>({
-    resolver: yupResolver(loginSchema),
-  });
+  const handleLogin = async () => {
+    const response = await login({ email, password });
 
-  const onSubmit = async (data: LoginRequest) => {
-    const result = await onLogin?.(data);
-    if (result?.token) {
-      router.replace("/"); // Redirect după login
+    if (response?.error) {
+      Alert.alert("Eroare", response.msg);
     } else {
-      setError(result?.msg || "Eroare la autentificare.");
+      router.replace("/(tabs)/profile");
     }
   };
 
   return (
-    <View className="space-y-4 px-6 py-8">
-      <Text className="text-2xl font-bold text-center mb-4">Autentificare</Text>
-
-      {error && <Text className="text-red-600">{error}</Text>}
-
+    <View>
       <TextInput
+        className="border border-gray-300 rounded-md px-4 py-2 mb-4"
         placeholder="Email"
-        onChangeText={(text) => setValue("email", text)}
-        className="border border-gray-300 rounded p-3"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
-      {errors.email && (
-        <Text className="text-red-500">{errors.email.message}</Text>
-      )}
-
       <TextInput
+        className="border border-gray-300 rounded-md px-4 py-2 mb-6"
         placeholder="Parolă"
         secureTextEntry
-        onChangeText={(text) => setValue("password", text)}
-        className="border border-gray-300 rounded p-3"
+        value={password}
+        onChangeText={setPassword}
       />
-      {errors.password && (
-        <Text className="text-red-500">{errors.password.message}</Text>
-      )}
-
       <TouchableOpacity
-        onPress={handleSubmit(onSubmit)}
-        className="bg-green-600 p-3 rounded"
+        onPress={handleLogin}
+        className="bg-green-600 py-3 rounded-lg"
       >
-        <Text className="text-white text-center">Conectează-te</Text>
+        <Text className="text-white text-center font-semibold">Log in</Text>
       </TouchableOpacity>
     </View>
   );

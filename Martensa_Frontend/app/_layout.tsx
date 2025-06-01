@@ -1,18 +1,28 @@
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { Stack } from "expo-router";
-import "../globals.css"; // importăm stilurile globale
-import { AuthProvider } from "./context/AuthContext";
+import { useEffect } from "react";
+import "../globals.css";
+import { AuthProvider } from "./context/AuthContext"; // păstrezi pentru layout fallback
 
 export default function RootLayout() {
+  const initAuth = useAuthStore((state) => state.initAuth);
+
+  useEffect(() => {
+    initAuth();
+  }, []);
+
   return (
     <AuthProvider>
-      {/* Stack Navigator pentru gestionarea navigării între ecrane */}
+      {/* dacă încă îl folosești pentru fallback */}
       <Stack screenOptions={{ headerShown: false }}>
-        {/* Tab Navigator principal */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* Ecranul de login definit în folderul auth (nu apare în tab-bar) */}
         <Stack.Screen
           name="auth/login"
           options={{ presentation: "modal", headerTitle: "Log in" }}
+        />
+        <Stack.Screen
+          name="auth/register"
+          options={{ presentation: "modal", headerTitle: "Register" }}
         />
         <Stack.Screen name="cart" options={{ headerShown: false }} />
       </Stack>

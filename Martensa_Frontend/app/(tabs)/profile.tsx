@@ -1,6 +1,6 @@
-import { useAuth } from "@/app/context/AuthContext";
-import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
-import { Ionicons } from "@expo/vector-icons";
+// modules/profile/screens/ProfileScreen.tsx
+import { ProfileItem } from "@/modules/profile/components/ProfileItem";
+import { useProfileData } from "@/modules/profile/hooks/useProfileData";
 import {
   SafeAreaView,
   ScrollView,
@@ -10,16 +10,14 @@ import {
 } from "react-native";
 
 export default function ProfileScreen() {
-  const { authState, onLogout } = useAuth();
-  const profile = useUserProfile();
+  const { profile, logout, authenticated } = useProfileData();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text className="text-2xl font-bold text-dark mb-4">Profil</Text>
 
-        {/* Informații utilizator */}
-        {authState?.authenticated && profile && (
+        {authenticated && profile && (
           <View className="mb-6">
             <Text className="text-xl font-semibold text-dark">
               {profile.firstName} {profile.lastName}
@@ -28,7 +26,6 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Cumpărături */}
         <Text className="text-lg font-semibold text-dark mb-2">
           Cumpărături
         </Text>
@@ -39,13 +36,12 @@ export default function ProfileScreen() {
           <ProfileItem icon="cart-outline" label="Cumpărat recent" noBorder />
         </View>
 
-        {/* Beneficii și loialitate */}
         <Text className="text-lg font-semibold text-dark mb-2">
           Program de loialitate și beneficii
         </Text>
         <View className="bg-gray-50 rounded-lg mb-4">
           <ProfileItem icon="pricetag-outline" label="Promoții personalizate" />
-          <ProfileItem icon="barcode-outline" label="Card Connect" />
+          <ProfileItem icon="barcode-outline" label="Card Martensa Connect" />
           <ProfileItem
             icon="pie-chart-outline"
             label="Economiile mele"
@@ -53,7 +49,6 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Detalii cont */}
         <Text className="text-lg font-semibold text-dark mb-2">
           Detalii cont
         </Text>
@@ -63,7 +58,6 @@ export default function ProfileScreen() {
           <ProfileItem icon="card-outline" label="Cardurile mele" noBorder />
         </View>
 
-        {/* Relații clienți */}
         <Text className="text-lg font-semibold text-dark mb-2">
           Relații clienți
         </Text>
@@ -77,7 +71,6 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Despre noi */}
         <Text className="text-lg font-semibold text-dark mb-2">Despre noi</Text>
         <View className="bg-gray-50 rounded-lg mb-6">
           <ProfileItem
@@ -87,15 +80,14 @@ export default function ProfileScreen() {
           <ProfileItem icon="document-outline" label="Termeni și condiții" />
           <ProfileItem
             icon="information-circle-outline"
-            label="Despre Mega Image"
+            label="Despre Martensa"
             noBorder
           />
         </View>
 
-        {/* Logout dacă e logat */}
-        {authState?.authenticated && (
+        {authenticated && (
           <TouchableOpacity
-            onPress={onLogout}
+            onPress={logout}
             className="border border-gray-300 rounded-lg p-3"
           >
             <Text className="text-center text-red-600 font-semibold">
@@ -107,25 +99,3 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
-
-const ProfileItem = ({
-  icon,
-  label,
-  noBorder = false,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  noBorder?: boolean;
-}) => (
-  <TouchableOpacity
-    className={`flex-row items-center justify-between px-4 py-3 ${
-      noBorder ? "" : "border-b border-gray-200"
-    }`}
-  >
-    <View className="flex-row items-center">
-      <Ionicons name={icon} size={20} color="#28a745" />
-      <Text className="ml-3 text-dark text-base">{label}</Text>
-    </View>
-    <Ionicons name="chevron-forward" size={20} color="#ccc" />
-  </TouchableOpacity>
-);

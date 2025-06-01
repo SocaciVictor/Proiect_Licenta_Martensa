@@ -1,37 +1,39 @@
-import { useAuth } from "@/app/context/AuthContext";
-import { UserProfileResponse } from "@/modules/auth/types/auth"; // ajustează calea dacă e altă locație
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
+import { UserProfileResponse } from "@/modules/auth/types/auth";
+import apiClient from "@/services/apiClient";
 import { decodeJwt } from "@/utils/decodeJwt";
 import { useEffect, useState } from "react";
-import apiClient from "../../../services/apiClient"; // asigură-te că ai configurat corect apiClient
 
 export const useUserProfile = () => {
-  const { authState } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!authState?.token) {
+      if (!token) {
         console.log("Token lipsă, nu se face fetch.");
         return;
       }
 
-      const decoded = decodeJwt(authState.token);
-      const email = decoded?.email;
-      if (!email) return;
+      const decoded = decodeJwt(token);
+      const email = decoded?.email || decoded?.sub;
+      if (!email) {
+        console.warn("Nu s-a putut decoda email-ul din JWT.");
+        return;
+      }
 
       try {
         const response = await apiClient.get<UserProfileResponse>("/users/me", {
           headers: { "X-User-Email": email },
         });
         setProfile(response.data);
-        console.log("User profile fetched successfully:", response.data);
-      } catch (err) {
-        console.error("Failed to fetch user profile:", err);
+      } catch (error) {
+        console.error("Eroare la fetch profile:", error);
       }
     };
 
     fetchProfile();
-  }, [authState?.token]);
+  }, [token]);
 
   return profile;
 };

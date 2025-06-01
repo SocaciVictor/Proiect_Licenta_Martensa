@@ -1,7 +1,6 @@
-// app/(tabs)/_layout.tsx
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs, usePathname, useRouter } from "expo-router";
-import React from "react";
 import {
   Image,
   SafeAreaView,
@@ -9,73 +8,61 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../context/AuthContext";
 
 export default function TabLayout() {
-  const router = useRouter();
   const pathname = usePathname();
-  const { authState } = useAuth();
+  const router = useRouter();
+  const authenticated = useAuthStore((state) => state.authenticated);
 
   const isHome = pathname === "/";
-
   const titles: { [key: string]: string } = {
     "/products": "Shop",
     "/benefits": "Beneficii",
     "/orders": "Comenzi",
     "/profile": "Profil",
   };
-
   const currentTitle = titles[pathname] || "";
-
-  const isAuthenticated = authState?.authenticated === true;
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* HEADER */}
       <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
-        {/* Left: dacă e logat și e Home, afișează "Cardul meu" + imagine */}
-        {isAuthenticated && isHome ? (
-          <View className="flex-row items-center space-x-2">
-            <TouchableOpacity onPress={() => router.push("/(tabs)/benefits")}>
-              <View className="flex-row items-center space-x-2">
-                {/* Imagine logo card */}
-                <Image
-                  source={require("../../assets/images/card-icon.png")}
-                  style={{ width: 30, height: 30, resizeMode: "contain" }}
-                />
-                <Text className="text-primary text-base font-semibold">
-                  Cardul meu
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+        {authenticated && isHome ? (
+          <TouchableOpacity onPress={() => router.push("/(tabs)/benefits")}>
+            <View className="flex-row items-center space-x-2">
+              <Image
+                source={require("../../assets/images/card-icon.png")}
+                style={{ width: 30, height: 30, resizeMode: "contain" }}
+              />
+              <Text className="text-primary text-base font-semibold">
+                Cardul meu
+              </Text>
+            </View>
+          </TouchableOpacity>
         ) : !isHome ? (
           <Text className="text-lg font-semibold text-black">
             {currentTitle}
           </Text>
         ) : (
-          <View className="w-20" /> // spațiu rezervat
+          <View className="w-20" />
         )}
 
-        {/* Right: login sau iconițe */}
         <View className="flex-row items-center space-x-4">
-          {!isAuthenticated && isHome ? (
+          {!authenticated && isHome ? (
             <TouchableOpacity onPress={() => router.push("/auth/login")}>
               <Text className="text-primary font-semibold text-base">
                 Login
               </Text>
             </TouchableOpacity>
-          ) : isAuthenticated && isHome ? (
-            <>
-              <TouchableOpacity onPress={() => router.push("/cart")}>
-                <Ionicons name="cart-outline" size={25} color="#28a745" />
-              </TouchableOpacity>
-            </>
+          ) : authenticated && isHome ? (
+            <TouchableOpacity onPress={() => router.push("/cart")}>
+              <Ionicons name="cart-outline" size={25} color="#28a745" />
+            </TouchableOpacity>
           ) : null}
         </View>
       </View>
 
-      {/* TABS (nicio schimbare aici) */}
+      {/* TABS */}
       <Tabs
         initialRouteName="index"
         screenOptions={{

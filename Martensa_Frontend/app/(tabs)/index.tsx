@@ -37,8 +37,6 @@ export default function HomeScreen() {
         </View>
         <Ionicons name="chevron-forward" size={20} color="#ccc" />
       </View>
-
-      {/* ... alte secțiuni pot continua aici ... */}
     </ScrollView>
   );
 }
