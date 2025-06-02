@@ -13,7 +13,9 @@ public class RouterValidator {
             "/auth/register",
             "/auth/login",
             "/auth/validate",
-            "auth/token"
+            "/auth/token",
+            "/products/category",
+            "/categories"
     );
 
     public Predicate<ServerHttpRequest> isSecured = request ->

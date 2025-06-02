@@ -151,3 +151,8 @@ export interface Payment {
   method: string;
   paymentDate: Date;
 }
+
+export interface CategoryResponse {
+  id: number;
+  name: string;
+}

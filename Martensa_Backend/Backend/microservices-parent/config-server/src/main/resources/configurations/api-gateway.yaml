@@ -64,6 +64,11 @@ spring:
                   - PUT
                   - DELETE
 
+        - id: category-service
+          uri: lb://productservice
+          predicates:
+            - Path=/categories/**
+
         - id: order-service
           uri: lb://order-service
           predicates:

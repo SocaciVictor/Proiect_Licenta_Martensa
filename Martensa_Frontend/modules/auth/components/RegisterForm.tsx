@@ -24,7 +24,7 @@ export default function RegisterForm() {
       address,
       phoneNumber,
       dateOfBirth,
-      roles: ["USER"],
+      roles: ["ROLE_CUSTOMER"],
     };
 
     const response = await register(payload);

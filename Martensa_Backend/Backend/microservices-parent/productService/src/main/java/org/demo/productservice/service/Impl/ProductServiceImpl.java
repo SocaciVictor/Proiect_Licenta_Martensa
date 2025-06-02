@@ -74,4 +74,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 
+    @Override
+    public List<ProductResponse> getProductsByCategory(Long id) {
+        return productMapper.toProductResponseList(productRepository.findAllByCategoryId(id));
+    }
 }

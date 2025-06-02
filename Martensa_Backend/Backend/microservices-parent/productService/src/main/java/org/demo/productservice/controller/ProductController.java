@@ -1,9 +1,11 @@
 package org.demo.productservice.controller;
 
 import jakarta.validation.Valid;
+import org.demo.productservice.dto.CategoryResponse;
 import org.demo.productservice.dto.ProductDetailsResponse;
 import org.demo.productservice.dto.ProductRequest;
 import org.demo.productservice.dto.ProductResponse;
+import org.demo.productservice.service.CategoryService;
 import org.demo.productservice.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,5 +51,11 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/category/{id}")
+    public List<ProductResponse> getProductsByCategory(@PathVariable Long id) {
+        return productService.getProductsByCategory(id);
+    }
+
 
 }
