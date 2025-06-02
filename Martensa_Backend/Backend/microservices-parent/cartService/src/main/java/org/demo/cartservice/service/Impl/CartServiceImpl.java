@@ -1,3 +1,4 @@
+
 package org.demo.cartservice.service.Impl;
 
 import jakarta.transaction.Transactional;
@@ -8,8 +9,8 @@ import org.demo.cartservice.dto.request.AddProductRequest;
 import org.demo.cartservice.dto.request.RemoveProductRequest;
 import org.demo.cartservice.dto.response.CartResponse;
 import org.demo.cartservice.dto.response.ProductDetailsResponse;
+import org.demo.cartservice.dto.response.ProductDetailsWithQuantity;
 import org.demo.cartservice.exception.CartNotFoundException;
-import org.demo.cartservice.exception.ProductAlreadyInCartException;
 import org.demo.cartservice.exception.ProductNotFoundException;
 import org.demo.cartservice.exception.ProductNotInCartException;
 import org.demo.cartservice.feign.ProductClient;
@@ -20,6 +21,7 @@ import org.demo.cartservice.service.CartService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,18 +42,33 @@ public class CartServiceImpl implements CartService {
                 .orElseGet(() -> {
                     Cart newCart = Cart.builder()
                             .userId(userId)
-                            .productsID(new java.util.ArrayList<>())
+                            .productsID(new java.util.HashMap<>())
                             .build();
                     return cartRepository.save(newCart);
                 });
 
-
-        List<ProductDetailsResponse> products = cart.getProductsID().stream()
-                .map(id -> {
+        List<ProductDetailsWithQuantity> products = cart.getProductsID().entrySet().stream()
+                .map(entry -> {
                     try {
-                        return productClient.getProductById(id);
+                        ProductDetailsResponse product = productClient.getProductById(entry.getKey());
+                        return new ProductDetailsWithQuantity(
+                                product.id(),
+                                product.name(),
+                                product.description(),
+                                product.brand(),
+                                product.price(),
+                                product.discountPrice(),
+                                product.imageUrl(),
+                                product.barcode(),
+                                product.ingredients(),
+                                product.nutritionalInfo(),
+                                product.disclaimer(),
+                                product.alcoholPercentage(),
+                                entry.getValue()
+                        );
+
                     } catch (Exception e) {
-                        throw new ProductNotFoundException(id);
+                        throw new ProductNotFoundException(entry.getKey());
                     }
                 })
                 .collect(Collectors.toList());
@@ -68,12 +85,8 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> Cart.builder()
                         .userId(userId)
-                        .productsID(new java.util.ArrayList<>())
+                        .productsID(new java.util.HashMap<>())
                         .build());
-
-        if (cart.getProductsID().contains(request.productId())) {
-            throw new ProductAlreadyInCartException(request.productId());
-        }
 
         try {
             productClient.getProductById(request.productId());
@@ -81,7 +94,7 @@ public class CartServiceImpl implements CartService {
             throw new ProductNotFoundException(request.productId());
         }
 
-        cart.getProductsID().add(request.productId());
+        cart.getProductsID().merge(request.productId(), 1, Integer::sum);
         cartRepository.save(cart);
     }
 
@@ -94,8 +107,16 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException(userId));
 
-        if (!cart.getProductsID().remove(request.productId())) {
+        Map<Long, Integer> products = cart.getProductsID();
+        if (!products.containsKey(request.productId())) {
             throw new ProductNotInCartException(request.productId());
+        }
+
+        int quantity = products.get(request.productId());
+        if (quantity > 1) {
+            products.put(request.productId(), quantity - 1);
+        } else {
+            products.remove(request.productId());
         }
 
         cartRepository.save(cart);
@@ -113,5 +134,4 @@ public class CartServiceImpl implements CartService {
         cart.getProductsID().clear();
         cartRepository.save(cart);
     }
-
 }

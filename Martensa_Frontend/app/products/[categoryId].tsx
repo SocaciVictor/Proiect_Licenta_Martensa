@@ -1,5 +1,4 @@
-// app/products/[categoryId].tsx
-import ProductCard from "@/modules/products/components/ProductCard";
+import ProductCardAdvanced from "@/modules/products/components/ProductCartAdvanced";
 import { useProductsByCategory } from "@/modules/products/hooks/useProductsByCategory";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,7 +17,6 @@ export default function ProductsByCategoryScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header */}
       <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
         <Text className="text-lg font-semibold text-black">{name}</Text>
         <TouchableOpacity onPress={() => router.push("/cart")}>
@@ -26,7 +24,6 @@ export default function ProductsByCategoryScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View className="flex-row items-center bg-gray-100 mx-4 mt-4 rounded-full px-4 py-2">
         <Ionicons name="search" size={20} color="#888" />
         <TextInput
@@ -36,7 +33,6 @@ export default function ProductsByCategoryScreen() {
         />
       </View>
 
-      {/* Lista produse */}
       <FlatList
         data={products}
         numColumns={2}
@@ -44,12 +40,7 @@ export default function ProductsByCategoryScreen() {
         className="mt-4"
         contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
         columnWrapperStyle={{ gap: 12 }}
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onAddToCart={() => console.log("Add to cart", item.id)}
-          />
-        )}
+        renderItem={({ item }) => <ProductCardAdvanced product={item} />}
         ListEmptyComponent={
           loading ? (
             <Text className="text-center mt-6 text-gray-400">

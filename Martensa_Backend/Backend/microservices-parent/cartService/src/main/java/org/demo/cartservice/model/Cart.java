@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -23,6 +24,8 @@ public class Cart {
 
     @ElementCollection
     @CollectionTable(name = "cart_products", joinColumns = @JoinColumn(name = "cart_id"))
-    @Column(name = "product_id")
-    private List<Long> productsID = new ArrayList<>();
+    @MapKeyColumn(name = "product_id")
+    @Column(name = "quantity")
+    private Map<Long, Integer> productsID;
+
 }

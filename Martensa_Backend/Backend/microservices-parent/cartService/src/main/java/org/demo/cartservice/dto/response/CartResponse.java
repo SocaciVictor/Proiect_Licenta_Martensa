@@ -7,7 +7,7 @@ import java.util.List;
 public record CartResponse(
         Long cartId,
         Long userId,
-        List<ProductDetailsResponse> products,
+        List<ProductDetailsWithQuantity> products,
         boolean isEmpty
 ) {
 }
