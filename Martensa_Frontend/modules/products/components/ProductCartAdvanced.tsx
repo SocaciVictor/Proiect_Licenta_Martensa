@@ -1,5 +1,6 @@
 import { ProductResponse } from "@/modules/auth/types/auth";
-import { useCart } from "@/modules/cart/hooks/useCart";
+import { useCartStore } from "@/modules/cart/store/useCartStore";
+import { useEffect } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
@@ -7,8 +8,12 @@ type Props = {
 };
 
 export default function ProductCardAdvanced({ product }: Props) {
-  const { quantities, addProduct, removeProduct } = useCart();
+  const { quantities, addProduct, removeProduct, fetchCart } = useCartStore();
   const quantity = quantities[product.id] || 0;
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
   return (
     <View className="bg-white rounded-lg p-2 border border-gray-200 w-[48%]">

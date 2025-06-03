@@ -1,7 +1,9 @@
+import { useCartStore } from "@/modules/cart/store/useCartStore";
 import ProductCardAdvanced from "@/modules/products/components/ProductCartAdvanced";
 import { useProductsByCategory } from "@/modules/products/hooks/useProductsByCategory";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import {
   FlatList,
   Text,
@@ -14,6 +16,10 @@ export default function ProductsByCategoryScreen() {
   const { categoryId, name } = useLocalSearchParams();
   const router = useRouter();
   const { products, loading } = useProductsByCategory(categoryId);
+  const fetchCart = useCartStore((state) => state.fetchCart);
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
   return (
     <View className="flex-1 bg-white">

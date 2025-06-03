@@ -1,12 +1,13 @@
-import { useAuthStore } from "@/modules/auth/store/useAuthStore";
-import { CartProduct, CartResponse } from "@/modules/cart/types/cart";
 import apiClient from "@/services/apiClient";
+import { decodeJwt } from "@/utils/decodeJwt";
+import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
+import { CartProduct, CartResponse } from "../types/cart";
 
 interface CartState {
   cart: CartResponse | null;
-  quantities: { [id: number]: number };
   products: CartProduct[];
+  quantities: { [id: number]: number };
   total: number;
   fetchCart: () => Promise<void>;
   addProduct: (productId: number) => Promise<void>;
@@ -16,92 +17,101 @@ interface CartState {
 
 export const useCartStore = create<CartState>((set, get) => ({
   cart: null,
-  quantities: {},
   products: [],
+  quantities: {},
   total: 0,
 
   fetchCart: async () => {
-    const token = useAuthStore.getState().token;
-    if (!token) return;
+    try {
+      const token = await SecureStore.getItemAsync("my-jwt");
+      if (!token) return;
+      const decoded = decodeJwt(token);
+      const email = decoded?.email || decoded?.sub;
+      if (!email) return;
 
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    const email = decoded?.email || decoded?.sub;
-    if (!email) return;
+      const res = await apiClient.get<CartResponse>("/carts/me", {
+        headers: { "X-User-Email": email },
+      });
 
-    const res = await apiClient.get<CartResponse>("/carts/me", {
-      headers: { "X-User-Email": email },
-    });
+      const productsList = res.data.products;
 
-    const countMap: { [id: number]: number } = {};
-    for (const p of res.data.products) {
-      countMap[p.id] = (countMap[p.id] || 0) + 1;
-    }
-
-    const uniqueProducts = Object.values(
-      res.data.products.reduce((acc, p) => {
-        if (!acc[p.id]) acc[p.id] = p;
+      const quantities = productsList.reduce((acc, product) => {
+        acc[product.id] = Math.max(product.quantity || 1, 1);
         return acc;
-      }, {} as { [id: number]: CartProduct })
-    );
+      }, {} as { [id: number]: number });
 
-    const total = res.data.products.reduce(
-      (acc, p) => acc + (p.discountPrice || p.price),
-      0
-    );
+      const total = productsList.reduce(
+        (sum, p) => sum + (p.discountPrice || p.price) * (p.quantity || 1),
+        0
+      );
 
-    set({
-      cart: res.data,
-      quantities: countMap,
-      products: uniqueProducts,
-      total,
-    });
+      set({
+        cart: res.data,
+        products: productsList,
+        quantities,
+        total,
+      });
+    } catch (err) {
+      console.error("Eroare la fetchCart:", err);
+    }
   },
 
   addProduct: async (productId) => {
-    const token = useAuthStore.getState().token;
-    if (!token) return;
+    try {
+      const token = await SecureStore.getItemAsync("my-jwt");
+      if (!token) return;
+      const decoded = decodeJwt(token);
+      const email = decoded?.email || decoded?.sub;
+      if (!email) return;
 
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    const email = decoded?.email || decoded?.sub;
-    if (!email) return;
+      await apiClient.post(
+        "/carts/add",
+        { productId },
+        {
+          headers: { "X-User-Email": email },
+        }
+      );
 
-    await apiClient.post(
-      "/carts/add",
-      { productId },
-      { headers: { "X-User-Email": email } }
-    );
-
-    await get().fetchCart();
+      await get().fetchCart();
+    } catch (err) {
+      console.error("Eroare la addProduct:", err);
+    }
   },
 
   removeProduct: async (productId) => {
-    const token = useAuthStore.getState().token;
-    if (!token) return;
+    try {
+      const token = await SecureStore.getItemAsync("my-jwt");
+      if (!token) return;
+      const decoded = decodeJwt(token);
+      const email = decoded?.email || decoded?.sub;
+      if (!email) return;
 
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    const email = decoded?.email || decoded?.sub;
-    if (!email) return;
+      await apiClient.delete("/carts/remove", {
+        headers: { "X-User-Email": email },
+        data: { productId },
+      });
 
-    await apiClient.delete("/carts/remove", {
-      headers: { "X-User-Email": email },
-      data: { productId },
-    });
-
-    await get().fetchCart();
+      await get().fetchCart();
+    } catch (err) {
+      console.error("Eroare la removeProduct:", err);
+    }
   },
 
   clearCart: async () => {
-    const token = useAuthStore.getState().token;
-    if (!token) return;
+    try {
+      const token = await SecureStore.getItemAsync("my-jwt");
+      if (!token) return;
+      const decoded = decodeJwt(token);
+      const email = decoded?.email || decoded?.sub;
+      if (!email) return;
 
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    const email = decoded?.email || decoded?.sub;
-    if (!email) return;
+      await apiClient.delete("/carts/clear", {
+        headers: { "X-User-Email": email },
+      });
 
-    await apiClient.delete("/carts/clear", {
-      headers: { "X-User-Email": email },
-    });
-
-    await get().fetchCart();
+      await get().fetchCart();
+    } catch (err) {
+      console.error("Eroare la clearCart:", err);
+    }
   },
 }));

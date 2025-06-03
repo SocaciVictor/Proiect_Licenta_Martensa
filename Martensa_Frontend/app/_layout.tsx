@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
+import { useCartStore } from "@/modules/cart/store/useCartStore";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import "../globals.css";
@@ -6,9 +7,10 @@ import { AuthProvider } from "./context/AuthContext"; // păstrezi pentru layout
 
 export default function RootLayout() {
   const initAuth = useAuthStore((state) => state.initAuth);
-
+  const fetchCart = useCartStore((state) => state.fetchCart);
   useEffect(() => {
     initAuth();
+    fetchCart();
   }, []);
 
   return (

@@ -1,14 +1,14 @@
-import { useCart } from "@/modules/cart/hooks/useCart";
 import { CartProduct } from "@/modules/cart/types/cart";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useCartStore } from "../store/useCartStore";
 
 type Props = {
   product: CartProduct;
-  quantity: number;
 };
 
-export default function CartProductCard({ product, quantity }: Props) {
-  const { addProduct, removeProduct } = useCart();
+export default function CartProductCard({ product }: Props) {
+  const { addProduct, removeProduct, quantities } = useCartStore();
+  const quantity = quantities[product.id] || 0;
 
   return (
     <View className="mb-6 border-b border-gray-200 pb-4">

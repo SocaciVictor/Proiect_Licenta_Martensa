@@ -5,6 +5,7 @@ export type CartProduct = {
   price: number;
   discountPrice: number;
   imageUrl: string;
+  quantity: number;
 };
 
 export type CartResponse = {
@@ -12,4 +13,5 @@ export type CartResponse = {
   userId: number;
   products: CartProduct[];
   isEmpty: boolean;
+  quantity: number;
 };
