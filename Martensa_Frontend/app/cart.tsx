@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import CartProductCard from "../modules/cart/components/CartProductCard";
 
 export default function CartScreen() {
@@ -45,7 +46,14 @@ export default function CartScreen() {
         data={products}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ padding: 12 }}
-        renderItem={({ item }) => <CartProductCard product={item} />}
+        renderItem={({ item }) => (
+          <CartProductCard
+            product={item}
+            quantity={quantities[item.id] || 0}
+            onIncrement={() => addProduct(item.id)}
+            onDecrement={() => removeProduct(item.id)}
+          />
+        )}
         ListEmptyComponent={
           <Text className="text-center mt-8 text-gray-500">
             Coșul este gol.
@@ -68,6 +76,7 @@ export default function CartScreen() {
           </TouchableOpacity>
         </View>
       )}
+      <Toast />
     </SafeAreaView>
   );
 }

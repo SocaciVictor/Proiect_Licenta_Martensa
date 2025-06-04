@@ -1,44 +1,58 @@
 import { CartProduct } from "@/modules/cart/types/cart";
+import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { useCartStore } from "../store/useCartStore";
 
 type Props = {
   product: CartProduct;
+  quantity: number;
+  onIncrement: () => void;
+  onDecrement: () => void;
 };
 
-export default function CartProductCard({ product }: Props) {
-  const { addProduct, removeProduct, quantities } = useCartStore();
-  const quantity = quantities[product.id] || 0;
+export default function CartProductCard({
+  product,
+  quantity,
+  onIncrement,
+  onDecrement,
+}: Props) {
+  const price = (product.discountPrice || product.price).toFixed(2);
 
   return (
-    <View className="mb-6 border-b border-gray-200 pb-4">
-      <View className="flex-row items-center">
-        <Image
-          source={{ uri: product.imageUrl }}
-          className="w-20 h-20 rounded mr-3"
-          resizeMode="contain"
-        />
-        <View className="flex-1">
-          <Text className="font-semibold">{product.name}</Text>
-          <Text className="text-sm text-gray-500">
-            {(product.discountPrice || product.price).toFixed(2)} Lei
-          </Text>
-          <View className="flex-row items-center mt-2 space-x-2">
-            <TouchableOpacity
-              className="bg-red-500 rounded px-2"
-              onPress={() => removeProduct(product.id)}
-            >
-              <Text className="text-white font-bold text-lg">−</Text>
-            </TouchableOpacity>
-            <Text>{quantity}</Text>
-            <TouchableOpacity
-              className="bg-green-600 rounded px-2"
-              onPress={() => addProduct(product.id)}
-            >
-              <Text className="text-white font-bold text-lg">+</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+    <View className="flex-row items-center justify-between bg-white p-4 border-b border-gray-200">
+      {/* Imagine produs */}
+      <Image
+        source={{ uri: product.imageUrl }}
+        className="w-16 h-16 rounded-md"
+        resizeMode="contain"
+      />
+
+      {/* Nume + Preț */}
+      <View className="flex-1 ml-4">
+        <Text className="text-base font-semibold text-black">
+          {product.name}
+        </Text>
+        <Text className="text-sm text-green-700">{price} Lei</Text>
+      </View>
+
+      {/* Butoane + / - */}
+      <View className="flex-row items-center space-x-2">
+        <TouchableOpacity
+          onPress={onDecrement}
+          className="w-10 h-10 border border-[#28a745] rounded-sm bg-white items-center justify-center"
+        >
+          <Ionicons name="remove" size={20} color="#28a745" />
+        </TouchableOpacity>
+
+        <Text className="w-6 text-center text-base font-semibold">
+          {quantity}
+        </Text>
+
+        <TouchableOpacity
+          onPress={onIncrement}
+          className="w-10 h-10 border border-[#28a745] rounded-sm bg-white items-center justify-center"
+        >
+          <Ionicons name="add" size={20} color="#28a745" />
+        </TouchableOpacity>
       </View>
     </View>
   );

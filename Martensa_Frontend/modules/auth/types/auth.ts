@@ -36,7 +36,7 @@ export interface UserProfileResponse {
   address: string;
   phoneNumber: string;
   dateOfBirth: Date;
-  loyaltyCardResponse: LoyaltyCardResponse;
+  loyaltyCard: LoyaltyCardResponse;
   roles: string[];
 }
 

@@ -1,7 +1,8 @@
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import Toast from "react-native-toast-message";
 import "../globals.css";
 import { AuthProvider } from "./context/AuthContext"; // păstrezi pentru layout fallback
 
@@ -28,6 +29,7 @@ export default function RootLayout() {
         />
         <Stack.Screen name="cart" options={{ headerShown: false }} />
       </Stack>
+      <Toast />
     </AuthProvider>
   );
 }

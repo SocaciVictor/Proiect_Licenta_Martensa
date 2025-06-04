@@ -1,5 +1,5 @@
-// app/products.tsx
 import CategoryGridItem from "@/modules/products/components/CategoryGridItem";
+import SearchOverlay from "@/modules/products/components/SearchOverlay";
 import { useCategories } from "@/modules/products/hooks/useCategories";
 import { useRouter } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
@@ -34,27 +34,39 @@ export default function ProductsScreen() {
   const router = useRouter();
 
   return (
-    <ScrollView className="flex-1 bg-white px-3 pt-2">
-      <Text className="text-xl font-bold text-gray-900 mb-3">Categorii</Text>
-      <View className="flex-row flex-wrap">
-        {categories.map((category) => (
-          <CategoryGridItem
-            key={category.id}
-            name={category.name}
-            imageUrl={categoryImages[category.name]}
-            onPress={() =>
-              router.push({
-                pathname: "/products/[categoryId]",
-                params: { categoryId: category.id, name: category.name },
-              })
-            }
-          />
-        ))}
-      </View>
+    <View className="flex-1 bg-white px-3 pt-2">
+      <SearchOverlay />
 
-      {loading && (
-        <Text className="text-center text-gray-500 my-4">Se încarcă...</Text>
-      )}
-    </ScrollView>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 60 }}
+      >
+        <Text className="text-xl font-bold text-gray-900 mb-3 mt-2">
+          Categorii
+        </Text>
+        <View className="flex-row flex-wrap justify-between">
+          {categories.map((category) => (
+            <CategoryGridItem
+              key={category.id}
+              name={category.name}
+              imageUrl={categoryImages[category.name]}
+              onPress={() =>
+                router.push({
+                  pathname: "/products/[categoryId]",
+                  params: {
+                    categoryId: category.id,
+                    name: category.name,
+                  },
+                })
+              }
+            />
+          ))}
+        </View>
+
+        {loading && (
+          <Text className="text-center text-gray-500 my-4">Se încarcă...</Text>
+        )}
+      </ScrollView>
+    </View>
   );
 }

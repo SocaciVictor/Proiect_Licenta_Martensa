@@ -19,19 +19,19 @@ public class JwtService {
     private String secretKey;
 
     public String generateToken(String email, List<String> roles, String tokenType) {
-
         long expMillis = "ACCESS".equalsIgnoreCase(tokenType)
-                ? Long.parseLong("86488") * 1000
-                : Long.parseLong("86488") * 1000 * 5;
+                ? 86488L * 1000     // 1 zi = 86400s + 88s ?
+                : 86488L * 1000 * 5; // 5 zile?
 
         return Jwts.builder()
                 .setSubject(email)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() * expMillis))
+                .setExpiration(new Date(System.currentTimeMillis() + expMillis))
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
                 .compact();
     }
+
 
 
     public boolean isTokenValid(String token) {
