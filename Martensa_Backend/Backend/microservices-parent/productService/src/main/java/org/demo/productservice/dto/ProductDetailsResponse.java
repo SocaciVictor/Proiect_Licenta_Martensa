@@ -1,6 +1,7 @@
 package org.demo.productservice.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductDetailsResponse(
         Long id,
@@ -15,6 +16,7 @@ public record ProductDetailsResponse(
         String nutritionalInfo,
         String disclaimer,
         Double alcoholPercentage,
-        String categoryName
+        String categoryName,
+        List<PromotionDto> promotions
 ) {
 }

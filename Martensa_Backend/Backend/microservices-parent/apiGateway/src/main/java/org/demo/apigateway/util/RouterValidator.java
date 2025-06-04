@@ -15,8 +15,10 @@ public class RouterValidator {
             "/auth/validate",
             "/auth/token",
             "/products/category",
-            "/categories"
+            "/categories",
+            "/promotions/product"  
     );
+
 
     public Predicate<ServerHttpRequest> isSecured = request ->
             openApiEndpoints.stream()

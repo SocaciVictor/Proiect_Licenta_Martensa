@@ -1,11 +1,14 @@
 package org.demo.productservice.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.demo.productservice.dto.ProductDetailsResponse;
 import org.demo.productservice.dto.ProductRequest;
 import org.demo.productservice.dto.ProductResponse;
+import org.demo.productservice.dto.PromotionDto;
 import org.demo.productservice.exception.CategoryNotFoundException;
 import org.demo.productservice.exception.ProductNotFoundException;
 import org.demo.productservice.mapper.ProductMapper;
+import org.demo.productservice.mapper.PromotionMapper;
 import org.demo.productservice.model.Category;
 import org.demo.productservice.model.Product;
 import org.demo.productservice.repository.CategoryRepository;
@@ -13,6 +16,8 @@ import org.demo.productservice.repository.ProductRepository;
 import org.demo.productservice.service.ProductService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,11 +26,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
+    private final PromotionMapper  promotionMapper;
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository,  PromotionMapper promotionMapper) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
+        this.promotionMapper = promotionMapper;
     }
 
     @Override
@@ -41,11 +48,33 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDetailsResponse getProductById(Long id) {
         return productRepository.findById(id)
-                .map(productMapper::toProductDetails)
+                .map(product -> {
+                    List<PromotionDto> promotionDtos = product.getPromotions().stream()
+                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
+                                    !p.getEndDate().isBefore(LocalDate.now()))
+                            .map(promotionMapper::toDto)
+                            .toList();
+
+                    if (!promotionDtos.isEmpty()) {
+                        PromotionDto promo = promotionDtos.get(0); // sau sortezi și iei max
+                        BigDecimal discount = product.getPrice()
+                                .multiply(BigDecimal.valueOf(promo.discountPercentage()))
+                                .divide(BigDecimal.valueOf(100));
+
+                        product.setDiscountPrice(product.getPrice().subtract(discount));
+                    } else {
+                        product.setDiscountPrice(null); // nu mai e activ
+                    }
+
+                    return productMapper.toProductDetails(product, promotionDtos);
+                })
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
+
+
 
     @Override
     public List<ProductResponse> getAllProducts() {

@@ -68,7 +68,18 @@ spring:
           uri: lb://productservice
           predicates:
             - Path=/categories/**
-
+        - id: promotion-service
+          uri: lb://productservice
+          predicates:
+            - Path=/promotions/**
+          filters:
+            - name: Authentication
+              args:
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - POST
+                  - DELETE
         - id: order-service
           uri: lb://order-service
           predicates:

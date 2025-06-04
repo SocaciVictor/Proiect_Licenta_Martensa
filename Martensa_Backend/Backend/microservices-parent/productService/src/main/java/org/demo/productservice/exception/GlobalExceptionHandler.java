@@ -16,5 +16,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(e.getMessage());
     }
 
+    @ExceptionHandler(PromotionNotFoundException.class)
+    public ResponseEntity<String> handlePromotionNotFound(PromotionNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
+
 
 }

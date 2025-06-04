@@ -6,6 +6,7 @@ import org.demo.productservice.dto.ProductResponse;
 
 import java.util.List;
 
+
 public interface ProductService {
     List<ProductResponse> getAllProducts();
     ProductDetailsResponse getProductById(Long id);
