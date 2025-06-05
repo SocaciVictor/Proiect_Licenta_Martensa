@@ -18,6 +18,10 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
+    @ExceptionHandler(StockNotFoundException.class)
+    public ResponseEntity<String> handleStockNotFound(StockNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleOtherExceptions(Exception ex) {

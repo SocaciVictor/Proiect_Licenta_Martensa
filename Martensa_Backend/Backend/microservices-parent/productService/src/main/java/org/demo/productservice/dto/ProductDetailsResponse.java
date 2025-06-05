@@ -17,6 +17,7 @@ public record ProductDetailsResponse(
         String disclaimer,
         Double alcoholPercentage,
         String categoryName,
-        List<PromotionDto> promotions
+        List<PromotionDto> promotions,
+        Integer quantity
 ) {
 }

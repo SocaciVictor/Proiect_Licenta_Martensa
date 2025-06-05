@@ -106,6 +106,19 @@ spring:
                   - POST
                   - PUT
                   - DELETE
+        - id: store-stock-service
+          uri: lb://store-service
+          predicates:
+            - Path=/stores/**
+          filters:
+            - name: Authentication
+              args:
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - POST
+                  - PUT
+                  - DELETE
 
         - id: cart-service
           uri: lb://cart-service

@@ -7,20 +7,25 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   product: ProductResponse;
+  onPress?: () => void; // 👈 adaugă onPress
 };
 
-export default function ProductCardAdvanced({ product }: Props) {
+export default function ProductCardAdvanced({ product, onPress }: Props) {
   const { quantities, addProduct, removeProduct, fetchCart } = useCartStore();
   const quantity = quantities[product.id] || 0;
 
   useEffect(() => {
-    fetchCart(); // ca să ai cantitățile sincronizate
+    fetchCart();
   }, []);
 
   const displayPrice = product.price.toFixed(2);
 
   return (
-    <View className="w-[48%] bg-white rounded-lg border border-gray-200 p-2">
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.9}
+      className="w-[48%] bg-white rounded-lg border border-gray-200 p-2"
+    >
       <Image
         source={{ uri: product.imageUrl }}
         className="w-full h-28 object-contain rounded"
@@ -31,17 +36,18 @@ export default function ProductCardAdvanced({ product }: Props) {
         {product.name}
       </Text>
 
-      {/* Preț mare */}
       <Text className="text-lg font-bold text-black mt-1">
         {displayPrice} Lei
       </Text>
 
-      {/* Buton Adaugă / Selector */}
       {quantity > 0 ? (
         <View className="flex-row justify-between items-center mt-2">
           <TouchableOpacity
             className="w-9 h-9 border border-[#28a745] rounded-sm items-center justify-center"
-            onPress={() => removeProduct(product.id)}
+            onPress={(e) => {
+              e.stopPropagation();
+              removeProduct(product.id);
+            }}
           >
             <Ionicons name="remove" size={20} color="#28a745" />
           </TouchableOpacity>
@@ -50,7 +56,11 @@ export default function ProductCardAdvanced({ product }: Props) {
 
           <TouchableOpacity
             className="w-9 h-9 border border-[#28a745] rounded-sm items-center justify-center"
-            onPress={() => addProduct(product.id)}
+            onPress={(e) => {
+              e.stopPropagation();
+              addProduct(product.id);
+              showToast("Produs adăugat în coș");
+            }}
           >
             <Ionicons name="add" size={20} color="#28a745" />
           </TouchableOpacity>
@@ -58,7 +68,8 @@ export default function ProductCardAdvanced({ product }: Props) {
       ) : (
         <TouchableOpacity
           className="mt-2 py-2 bg-[#28a745] rounded flex-row items-center justify-center"
-          onPress={() => {
+          onPress={(e) => {
+            e.stopPropagation();
             addProduct(product.id);
             showToast("Produs adăugat în coș");
           }}
@@ -67,6 +78,6 @@ export default function ProductCardAdvanced({ product }: Props) {
           <Text className="text-white font-semibold ml-2">Adaugă</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }

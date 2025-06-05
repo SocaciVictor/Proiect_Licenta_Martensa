@@ -14,15 +14,16 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = OrderItemMapper.class)
 public interface OrderMapper {
 
-    @Mapping(target = "id",             ignore = true)
-    @Mapping(target = "userId",         source = "userId")
-    @Mapping(target = "orderDate",      expression = "java(LocalDate.now())")
-    @Mapping(target = "orderStatus",    constant = "PENDING")
-    @Mapping(target = "shippingAddress",source = "request.shippingAddress")
-    @Mapping(target = "paymentMethod",  source = "request.paymentMethod")
-    @Mapping(target = "trackingNumber", ignore = true)
-    @Mapping(target = "totalAmount",    source = "total")
-    @Mapping(target = "items",          source = "items")
+    @Mapping(target = "id",              ignore = true)
+    @Mapping(target = "userId",          source = "userId")
+    @Mapping(target = "orderDate",       expression = "java(LocalDate.now())")
+    @Mapping(target = "orderStatus",     constant = "PENDING")
+    @Mapping(target = "shippingAddress", source = "request.shippingAddress")
+    @Mapping(target = "paymentMethod",   source = "request.paymentMethod")
+    @Mapping(target = "trackingNumber",  ignore = true)
+    @Mapping(target = "totalAmount",     source = "total")
+    @Mapping(target = "items",           source = "items")
+    @Mapping(target = "storeId",         source = "request.storeId")
     Order toEntity(OrderRequest request,
                    Long userId,
                    List<OrderItem> items,
@@ -30,3 +31,4 @@ public interface OrderMapper {
 
     OrderResponse toResponse(Order order);
 }
+

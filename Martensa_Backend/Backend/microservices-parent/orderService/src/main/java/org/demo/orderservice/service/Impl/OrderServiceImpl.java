@@ -1,5 +1,8 @@
 package org.demo.orderservice.service.Impl;
 
+import org.bouncycastle.util.StoreException;
+import org.demo.orderservice.exception.StoreNotFoundException;
+import org.demo.orderservice.feign.StoreClient;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,27 +36,35 @@ public class OrderServiceImpl implements OrderService {
     private final RabbitTemplate rabbitTemplate;
     private final OrderRabbitProperties rabbitProps;
     private final OrderMapper orderMapper;
+    private final StoreClient  storeClient;
 
     @Override
     public OrderResponse placeOrder(OrderRequest request, String email) {
+        if (request.storeId() == null) {
+            throw new StoreNotFoundException("Nu s-a trimis niciun id");
+        }
+
         UserSummaryDto user = userClient.getUserByEmail(email);
         List<ProductDTO> products = request.productIds().stream()
                 .map(productClient::getProductById)
                 .toList();
 
-        BigDecimal total = products.stream()
-                .map(ProductDTO::price)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         List<OrderItem> items = products.stream()
-                .map(p -> OrderItem.builder()
-                        .productId(p.id())
-                        .productName(p.name())
-                        .price(p.price())
-                        .quantity(1)
-                        .build())
+                .map(p -> {
+                    BigDecimal finalPrice = (p.discountPrice() != null) ? p.discountPrice() : p.price();
+                    return OrderItem.builder()
+                            .productId(p.id())
+                            .productName(p.name())
+                            .price(finalPrice)
+                            .quantity(1)
+                            .build();
+                })
                 .toList();
 
+
+        BigDecimal total = items.stream()
+                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Order order = orderMapper.toEntity(request, user.id(), items, total);
         items.forEach(item -> item.setOrder(order));
@@ -61,22 +72,15 @@ public class OrderServiceImpl implements OrderService {
 
         Order saved = orderRepository.save(order);
 
-        OrderCreatedEvent event = new OrderCreatedEvent(
-                saved.getId(),
-                saved.getUserId(),
-                saved.getTotalAmount(),
-                request.productIds(),
-                saved.getPaymentMethod()
-        );
-
         rabbitTemplate.convertAndSend(
                 rabbitProps.getOrder().getExchange(),
                 rabbitProps.getOrder().getRoutingKey(),
-                event
+                new OrderCreatedEvent(saved.getId(), saved.getUserId(), total, request.productIds(), saved.getPaymentMethod())
         );
 
         return orderMapper.toResponse(saved);
     }
+
 
     @Override
     @Transactional(readOnly = true)

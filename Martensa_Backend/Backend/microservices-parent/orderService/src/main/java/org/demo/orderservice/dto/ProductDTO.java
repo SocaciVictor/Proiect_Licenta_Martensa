@@ -6,6 +6,7 @@ public record ProductDTO(
         Long id,
         String name,
         BigDecimal price,
+        BigDecimal discountPrice,
         String description
 ) {
 

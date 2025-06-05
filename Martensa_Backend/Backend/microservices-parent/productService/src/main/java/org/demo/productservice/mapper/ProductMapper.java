@@ -52,6 +52,23 @@ public interface ProductMapper {
     @Mapping(target = "promotions", source = "promotions")
     ProductDetailsResponse toProductDetails(Product product, List<PromotionDto> promotions);
 
+    @Mapping(target = "id", source = "product.id")
+    @Mapping(target = "name", source = "product.name")
+    @Mapping(target = "description", source = "product.description")
+    @Mapping(target = "brand", source = "product.brand")
+    @Mapping(target = "price", source = "product.price")
+    @Mapping(target = "discountPrice", source = "product.discountPrice")
+    @Mapping(target = "imageUrl", source = "product.imageUrl")
+    @Mapping(target = "barcode", source = "product.barcode")
+    @Mapping(target = "ingredients", source = "product.ingredients")
+    @Mapping(target = "nutritionalInfo", source = "product.nutritionalInfo")
+    @Mapping(target = "disclaimer", source = "product.disclaimer")
+    @Mapping(target = "alcoholPercentage", source = "product.alcoholPercentage")
+    @Mapping(target = "categoryName", source = "product.category.name")
+    @Mapping(target = "promotions", source = "promotions")
+    @Mapping(target = "quantity", source = "quantity")
+    ProductDetailsResponse toProductDetails(Product product, List<PromotionDto> promotions, Integer quantity);
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "name")
     @Mapping(target = "description", source = "description")

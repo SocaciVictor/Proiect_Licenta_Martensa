@@ -15,6 +15,7 @@ import org.demo.productservice.repository.CategoryRepository;
 import org.demo.productservice.repository.ProductRepository;
 import org.demo.productservice.service.ProductService;
 import org.springframework.stereotype.Service;
+import org.demo.productservice.feign.StoreServiceClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,12 +28,15 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final PromotionMapper  promotionMapper;
+    private final StoreServiceClient storeServiceClient;
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository,  PromotionMapper promotionMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository,
+                              PromotionMapper promotionMapper,  StoreServiceClient storeServiceClient) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
         this.promotionMapper = promotionMapper;
+        this.storeServiceClient = storeServiceClient;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
                             .toList();
 
                     if (!promotionDtos.isEmpty()) {
-                        PromotionDto promo = promotionDtos.get(0); // sau sortezi și iei max
+                        PromotionDto promo = promotionDtos.get(0);
                         BigDecimal discount = product.getPrice()
                                 .multiply(BigDecimal.valueOf(promo.discountPercentage()))
                                 .divide(BigDecimal.valueOf(100));
@@ -73,6 +77,47 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
+
+
+
+
+    @Override
+    @Transactional
+    public ProductDetailsResponse getProductById(Long id, Long storeId) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    List<PromotionDto> promotionDtos = product.getPromotions().stream()
+                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
+                                    !p.getEndDate().isBefore(LocalDate.now()))
+                            .map(promotionMapper::toDto)
+                            .toList();
+
+                    if (!promotionDtos.isEmpty()) {
+                        PromotionDto promo = promotionDtos.get(0);
+                        BigDecimal discount = product.getPrice()
+                                .multiply(BigDecimal.valueOf(promo.discountPercentage()))
+                                .divide(BigDecimal.valueOf(100));
+
+                        product.setDiscountPrice(product.getPrice().subtract(discount));
+                    } else {
+                        product.setDiscountPrice(null);
+                    }
+
+                    Integer quantity = null;
+                    if (storeId != null) {
+                        try {
+                            var stock = storeServiceClient.getStockForProduct(storeId, product.getId());
+                            quantity = stock.quantity();
+                        } catch (Exception e) {
+                            quantity = null; // sau loghezi fallback
+                        }
+                    }
+
+                    return productMapper.toProductDetails(product, promotionDtos, quantity);
+                })
+                .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
 
 
 

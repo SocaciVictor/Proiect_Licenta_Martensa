@@ -30,6 +30,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
+    @Column(name = "store_id", nullable = false)
+    private Long storeId;
+
     private String shippingAddress;
     private String paymentMethod;
     private String trackingNumber;

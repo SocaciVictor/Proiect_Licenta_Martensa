@@ -36,7 +36,17 @@ export default function ProductsByCategoryScreen() {
           className="mt-4"
           contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
           columnWrapperStyle={{ gap: 12 }}
-          renderItem={({ item }) => <ProductCardAdvanced product={item} />}
+          renderItem={({ item }) => (
+            <ProductCardAdvanced
+              product={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/products/details/[id]",
+                  params: { id: item.id },
+                })
+              }
+            />
+          )}
           ListEmptyComponent={
             loading ? (
               <Text className="text-center mt-6 text-gray-400">
@@ -49,6 +59,7 @@ export default function ProductsByCategoryScreen() {
             )
           }
         />
+
         <Toast />
       </View>
     </View>
