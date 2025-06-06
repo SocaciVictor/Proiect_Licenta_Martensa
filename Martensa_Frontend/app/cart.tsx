@@ -1,5 +1,6 @@
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect } from "react";
 import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -69,9 +70,12 @@ export default function CartScreen() {
               {total.toFixed(2)} Lei
             </Text>
           </View>
-          <TouchableOpacity className="bg-primary rounded py-3">
+          <TouchableOpacity
+            className="bg-primary rounded py-3"
+            onPress={() => router.push("/store/map")}
+          >
             <Text className="text-white text-center font-bold text-base">
-              Comandă
+              Selectează magazinu
             </Text>
           </TouchableOpacity>
         </View>

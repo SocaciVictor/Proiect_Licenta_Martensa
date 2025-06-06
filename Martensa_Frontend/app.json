@@ -4,7 +4,8 @@
     "slug": "Martensa_Frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "martensafrontend",
+    "scheme": "martensa",
+    "deepLinks": ["martensa://", "martensa://success", "martensa://cancel"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

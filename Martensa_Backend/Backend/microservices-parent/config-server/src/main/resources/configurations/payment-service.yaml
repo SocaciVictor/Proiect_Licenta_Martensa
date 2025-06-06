@@ -48,4 +48,7 @@ rabbit:
     routing-key: payment.response.routing-key
     queue: payment.response.queue
 
-
+stripe:
+  secretKey: "sk_test_51RSzJM2SIPTdAEhYlqHrdWbO2MJiPzqQMbcgLZsfkLkxhiWigYzwFxKltEMO6YfvlGkuwxAK9paHHzO1065N913F00ASR40GQs"
+  webhook:
+    secret: acct_1RSzJM2SIPTdAEhY

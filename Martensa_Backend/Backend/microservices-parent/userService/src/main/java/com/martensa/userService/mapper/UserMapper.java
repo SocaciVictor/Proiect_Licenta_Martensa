@@ -62,6 +62,7 @@ public interface UserMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "loyaltyCard", expression = "java(mapLoyalty(user.getLoyaltyCard()))")
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToStrings")
     UserProfileResponse toUserProfile(User user);

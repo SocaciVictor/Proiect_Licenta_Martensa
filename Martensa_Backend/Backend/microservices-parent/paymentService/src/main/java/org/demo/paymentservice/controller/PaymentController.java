@@ -19,4 +19,6 @@ public class PaymentController {
     public ResponseEntity<List<Payment>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(paymentService.getPaymentsByUserId(userId));
     }
+
+
 }

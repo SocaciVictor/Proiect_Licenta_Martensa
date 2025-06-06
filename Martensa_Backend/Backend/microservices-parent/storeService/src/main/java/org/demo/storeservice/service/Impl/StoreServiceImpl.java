@@ -53,4 +53,9 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new StoreNotFoundException(id));
         storeRepository.delete(store);
     }
+
+    @Override
+    public List<StoreResponse> findStoresWithProductsInStock(List<Long> productIds) {
+        return List.of();
+    }
 }

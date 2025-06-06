@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.orderservice.dto.request.OrderRequest;
 import org.demo.orderservice.dto.response.OrderResponse;
+import org.demo.orderservice.model.enums.OrderStatus;
 import org.demo.orderservice.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,4 +41,16 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> getAllOrders(@RequestHeader("roles") String roles) {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderResponse>> getOrdersByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+    }
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<OrderStatus> getOrderStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderStatus(id));
+    }
+
+
 }

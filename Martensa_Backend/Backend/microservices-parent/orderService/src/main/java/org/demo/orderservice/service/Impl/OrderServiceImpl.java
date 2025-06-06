@@ -120,4 +120,21 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByUserId(Long userId) {
+        return orderRepository.findAllByUserId(userId).stream()
+                .map(orderMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderStatus getOrderStatus(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        return order.getOrderStatus();
+    }
+
+
 }

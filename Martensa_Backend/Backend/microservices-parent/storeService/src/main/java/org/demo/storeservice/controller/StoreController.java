@@ -44,4 +44,10 @@ public class StoreController {
         storeService.deleteStore(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<StoreResponse>> getStoresWithStock(@RequestBody List<Long> productIds) {
+        return ResponseEntity.ok(storeService.findStoresWithProductsInStock(productIds));
+    }
+
 }

@@ -11,4 +11,6 @@ public interface StoreService {
     void createStore(StoreRequest request);
     void updateStore(Long id, StoreRequest request);
     void deleteStore(Long id);
+
+    List<StoreResponse> findStoresWithProductsInStock(List<Long> productIds);
 }

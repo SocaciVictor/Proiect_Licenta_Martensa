@@ -4,11 +4,13 @@ import org.demo.paymentservice.model.enums.PaymentStatus;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 public record PaymentCompletedEvent(
         Long orderId,
         Long userId,
         BigDecimal amount,
-        PaymentStatus status
+        PaymentStatus status,
+        List<ProductQuantity> productQuantities
 ) {
 }

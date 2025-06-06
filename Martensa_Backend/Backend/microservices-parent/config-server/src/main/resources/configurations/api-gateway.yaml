@@ -140,3 +140,9 @@ spring:
             - Path=/payments/**
           filters:
             - name: Authentication
+        - id: stripe-endpoints
+          uri: lb://payment-service
+          predicates:
+            - Path=/payments/**
+          filters:
+            - name: Authentication

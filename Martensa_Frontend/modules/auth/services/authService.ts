@@ -13,3 +13,11 @@ export const register = async (
   const response = await apiClient.post<AuthResponse>("/auth/register", data);
   return response.data;
 };
+
+export const validateToken = async (token: string) => {
+  return await apiClient.post("/auth/validate", null, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

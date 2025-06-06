@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.demo.paymentservice.config.PaymentRabbitProperties;
 import org.demo.paymentservice.dto.OrderCreatedEvent;
 import org.demo.paymentservice.dto.PaymentCompletedEvent;
+import org.demo.paymentservice.dto.ProductQuantity;
 import org.demo.paymentservice.model.Payment;
 import org.demo.paymentservice.model.enums.PaymentStatus;
 import org.demo.paymentservice.service.PaymentService;
@@ -13,6 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,8 +29,12 @@ public class PaymentListener {
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("⬅️ [x] Received OrderCreatedEvent for orderId={}", event.orderId());
 
-
         boolean paymentOk = simulatePaymentProcessing();
+
+        // Mapăm produsele din OrderCreatedEvent în ProductQuantity:
+        List<ProductQuantity> productQuantities = event.products().stream()
+                .map(p -> new ProductQuantity(p.productId(), p.quantity()))
+                .toList();
 
         if (paymentOk) {
             Payment payment = Payment.builder()
@@ -49,9 +55,12 @@ public class PaymentListener {
                             event.orderId(),
                             event.userId(),
                             event.totalAmount(),
-                            PaymentStatus.SUCCESS
+                            PaymentStatus.SUCCESS,
+                            productQuantities
                     )
             );
+
+            log.info("✅ Emitted PaymentCompletedEvent for orderId={}", event.orderId());
         } else {
             rabbitTemplate.convertAndSend(
                     rabbitProps.getOrderResponse().getExchange(),
@@ -60,14 +69,16 @@ public class PaymentListener {
                             event.orderId(),
                             event.userId(),
                             event.totalAmount(),
-                            PaymentStatus.FAILED
+                            PaymentStatus.FAILED,
+                            productQuantities
                     )
             );
+
+            log.info("❌ Emitted FAILED PaymentCompletedEvent for orderId={}", event.orderId());
         }
     }
 
     private boolean simulatePaymentProcessing() {
-        // Aici poți pune o logica reală sau doar return true/false
-        return true; // sau false, pentru test
+        return true; // sau false pentru testare
     }
 }

@@ -8,6 +8,7 @@ public record OrderCreatedEvent(
         Long userId,
         BigDecimal totalAmount,
         List<Long> productIds,
+        List<ProductQuantity> products,
         String paymentMethod
 ) {
 }
