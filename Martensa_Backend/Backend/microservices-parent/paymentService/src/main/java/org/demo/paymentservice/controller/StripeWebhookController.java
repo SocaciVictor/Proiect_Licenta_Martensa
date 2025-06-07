@@ -2,8 +2,10 @@ package org.demo.paymentservice.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/payments/stripe/webhook")
@@ -32,6 +35,9 @@ public class StripeWebhookController {
 
     @Value("${stripe.webhook.secret}")
     private String endpointSecret;
+
+    @Value("${stripe.secretKey}")
+    private String secretKey;
 
     @PostMapping
     public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload,
@@ -55,17 +61,27 @@ public class StripeWebhookController {
                     .orElseThrow(() -> new IllegalStateException("Invalid session object"));
 
             try {
-                Long orderId = Long.parseLong(session.getClientReferenceId());
-                Long userId = Long.parseLong(session.getMetadata().get("userId"));
+                Stripe.apiKey = secretKey; // setezi cheia Stripe
+
+                // 🟢 Retrieve metadata din PaymentIntent:
+                String paymentIntentId = session.getPaymentIntent();
+                PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+                Map<String, String> metadata = intent.getMetadata();
+
+                log.info("🎁 PaymentIntent metadata = {}", metadata);
+
+                // 🟢 Extragem valori:
+                Long orderId = Long.parseLong(metadata.get("orderId"));
+                Long userId = Long.parseLong(metadata.get("userId"));
 
                 BigDecimal amount = session.getAmountTotal() != null
                         ? new BigDecimal(session.getAmountTotal()).divide(new BigDecimal(100))
                         : BigDecimal.ZERO;
 
-                String productsJson = session.getMetadata().get("products");
+                String productsJson = metadata.get("products");
                 List<ProductQuantity> products = objectMapper.readValue(productsJson, new TypeReference<>() {});
 
-                // Emit PaymentCompletedEvent
+                // 🟢 Emit PaymentCompletedEvent
                 rabbitTemplate.convertAndSend(
                         rabbitProps.getOrderResponse().getExchange(),
                         rabbitProps.getOrderResponse().getRoutingKey(),
@@ -84,6 +100,7 @@ public class StripeWebhookController {
             } catch (Exception e) {
                 log.error("💥 Error processing checkout.session.completed webhook", e);
             }
+
         } else {
             log.info("ℹ️ Ignored event type: {}", event.getType());
         }

@@ -22,7 +22,8 @@ public class OrderListener {
 
     @RabbitListener(queues = "${rabbit.payment-response.queue}")
     public void handlePaymentResult(PaymentCompletedEvent event) {
-        log.info("⬅️ [x] Received PaymentCompletedEvent for orderId={}, status={}", event.orderId(), event.status(), event.products().size());
+        log.info("⬅️ [x] Received PaymentCompletedEvent for orderId={}, status={}, products={}",
+                event.orderId(), event.status(), event.products());
 
         try {
             orderRepository.findByIdWithItems(event.orderId()).ifPresentOrElse(order -> {
@@ -31,7 +32,6 @@ public class OrderListener {
                     orderRepository.save(order);
 
                     if (order.getStoreId() != null && event.products() != null) {
-                        // Scădem stoc pe baza cantităților din ProductQuantity
                         for (ProductQuantity pq : event.products()) {
                             if (pq.quantity() > 0) {
                                 storeClient.decreaseStock(order.getStoreId(), pq.productId(), pq.quantity());
@@ -44,7 +44,6 @@ public class OrderListener {
                                 order.getStoreId(),
                                 event.products(),
                                 order.getId());
-
                     }
 
                     log.info("✅ Order {} marked as COMPLETED", order.getId());
@@ -61,4 +60,5 @@ public class OrderListener {
             log.error("💥 Exception while processing PaymentCompletedEvent: {}", e.getMessage(), e);
         }
     }
+
 }

@@ -44,13 +44,21 @@ public class StripeServiceImpl {
                 .toList();
 
         try {
+            // Metadata pentru intent
+            String productsJson = objectMapper.writeValueAsString(productQuantities);
+
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl("martensa://success?orderId=" + checkoutRequest.orderId())
                     .setCancelUrl("martensa://cancel?orderId=" + checkoutRequest.orderId())
                     .setClientReferenceId(checkoutRequest.orderId().toString())
-                    .putMetadata("userId", checkoutRequest.userId().toString())
-                    .putMetadata("products", objectMapper.writeValueAsString(productQuantities)) // ✅ cheia corecta
+                    .setPaymentIntentData(
+                            SessionCreateParams.PaymentIntentData.builder()
+                                    .putMetadata("orderId", checkoutRequest.orderId().toString())
+                                    .putMetadata("userId", checkoutRequest.userId().toString())
+                                    .putMetadata("products", productsJson)
+                                    .build()
+                    )
                     .addAllLineItem(lineItems)
                     .build();
 
@@ -84,3 +92,4 @@ public class StripeServiceImpl {
     }
 
 }
+

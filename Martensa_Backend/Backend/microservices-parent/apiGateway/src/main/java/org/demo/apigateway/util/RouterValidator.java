@@ -17,7 +17,8 @@ public class RouterValidator {
             "/products/category",
             "/products",
             "/categories",
-            "/promotions/product"
+            "/promotions/product",
+            "/payments/**"
     );
 
 

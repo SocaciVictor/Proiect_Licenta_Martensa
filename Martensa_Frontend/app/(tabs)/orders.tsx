@@ -18,6 +18,7 @@ export default function OrdersScreen() {
   useEffect(() => {
     if (userId) {
       fetchOrdersByUserId(userId);
+      console.log("Fetching orders for user ID:", userId);
     }
   }, [userId]);
 

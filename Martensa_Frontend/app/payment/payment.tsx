@@ -3,18 +3,21 @@ import { useCartStore } from "@/modules/cart/store/useCartStore";
 import PayButton from "@/modules/payments/components/PayButton";
 import { useStripeCheckout } from "@/modules/payments/hooks/useStripeCheckout";
 import { useSelectedStore } from "@/modules/stores/store/useSelectedStore";
-import { useNavigation } from "@react-navigation/native";
-import { Text } from "react-native";
+import apiClient from "@/services/apiClient";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PaymentScreen() {
   const { selectedStoreId, selectedStoreName, clearSelectedStore } =
     useSelectedStore();
   const { total, products, quantities, clearCart } = useCartStore();
-  const navigation = useNavigation();
   const userId = useAuthStore((state) => state.userId);
   const user = useAuthStore((state) => state.user);
   const { checkout } = useStripeCheckout();
+
+  const [orderId, setOrderId] = useState<number | null>(null);
 
   const handlePlaceOrder = async () => {
     if (!selectedStoreId) {
@@ -25,7 +28,7 @@ export default function PaymentScreen() {
     const orderPayload = {
       storeId: selectedStoreId,
       products: products.map((p) => ({
-        productId: p.id,
+        productId: p.id, // foarte important pentru stock decrease!
         quantity: quantities[p.id] || 1,
       })),
       shippingAddress: user?.address,
@@ -36,6 +39,7 @@ export default function PaymentScreen() {
       orderId,
       userId: userId,
       products: products.map((p) => ({
+        productId: p.id, // aici e cheia!
         amount: Math.round((p.discountPrice ?? p.price) * 100),
         quantity: quantities[p.id] || 1,
         name: p.name,
@@ -44,14 +48,37 @@ export default function PaymentScreen() {
     });
 
     console.log("Placing order with payload:", orderPayload);
-    console.log("Checkout payload builder:", checkoutPayloadBuilder);
 
     const result = await checkout(orderPayload, checkoutPayloadBuilder);
 
     if (result.success) {
       console.log("Checkout flow launched for order:", result.orderId);
+      setOrderId(result.orderId);
+      router.push(`/succes/${result.orderId}`);
     } else {
       alert("Eroare la procesarea plății!");
+    }
+  };
+
+  const handleCheckPaymentStatus = async () => {
+    if (!orderId) return;
+
+    try {
+      const res = await apiClient.get(`/orders/${orderId}/status`);
+      const status = res.data;
+      console.log("🕵️ Order status:", status);
+
+      if (status === "COMPLETED") {
+        clearCart();
+        router.replace(`/succes/${orderId}`);
+      } else if (status === "FAILED") {
+        router.replace(`/cancel/${orderId}`);
+      } else {
+        alert(`Status actual: ${status}. Încearcă din nou mai târziu.`);
+      }
+    } catch (err) {
+      console.error("Eroare la verificarea statusului comenzii:", err);
+      alert("Eroare la verificarea statusului comenzii!");
     }
   };
 
@@ -70,7 +97,18 @@ export default function PaymentScreen() {
         Total: <Text className="font-bold text-lg">{total.toFixed(2)} Lei</Text>
       </Text>
 
-      <PayButton onPress={handlePlaceOrder} />
+      {!orderId && <PayButton onPress={handlePlaceOrder} />}
+
+      {orderId && (
+        <TouchableOpacity
+          className="bg-blue-600 py-3 rounded-lg mt-4"
+          onPress={handleCheckPaymentStatus}
+        >
+          <Text className="text-white text-center font-bold text-base">
+            Verifică status plată
+          </Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }

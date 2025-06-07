@@ -21,7 +21,6 @@ import java.util.List;
 @Slf4j
 public class PaymentListener {
 
-    private final PaymentService paymentService;
     private final RabbitTemplate rabbitTemplate;
     private final PaymentRabbitProperties rabbitProps;
 
@@ -29,62 +28,14 @@ public class PaymentListener {
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("⬅️ [x] Received OrderCreatedEvent for orderId={}", event.orderId());
 
-        boolean paymentOk = simulatePaymentProcessing();
-
-        // SAFE fallback pentru products null
-        List<ProductQuantity> productQuantities = (event.products() != null ? event.products() : List.<ProductQuantity>of())
-                .stream()
-                .map(p -> new ProductQuantity(p.productId(), p.quantity()))
-                .toList();
-
-        if (paymentOk) {
-            Payment payment = Payment.builder()
-                    .orderId(event.orderId())
-                    .userId(event.userId())
-                    .amount(event.totalAmount())
-                    .method(event.paymentMethod())
-                    .paymentDate(LocalDate.now())
-                    .status(PaymentStatus.SUCCESS)
-                    .build();
-
-            paymentService.save(payment);
-
-            rabbitTemplate.convertAndSend(
-                    rabbitProps.getOrderResponse().getExchange(),
-                    rabbitProps.getOrderResponse().getRoutingKey(),
-                    new PaymentCompletedEvent(
-                            event.orderId(),
-                            event.userId(),
-                            event.totalAmount(),
-                            productQuantities,
-                            PaymentStatus.SUCCESS
-
-                    )
+        if (event.products() != null) {
+            event.products().forEach(pq ->
+                    log.info("➡️ ProductId={} quantity={}", pq.productId(), pq.quantity())
             );
-            log.info("Payment COmpleted Evend", productQuantities);
-            log.info("<UNK> [x] Received OrderCreatedEvent for orderId={}", event.orderId());
-            log.info("total amount ",  event.totalAmount());
-            log.info("✅ Emitted PaymentCompletedEvent for orderId={}", event.orderId());
-        } else {
-            rabbitTemplate.convertAndSend(
-                    rabbitProps.getOrderResponse().getExchange(),
-                    rabbitProps.getOrderResponse().getRoutingKey(),
-                    new PaymentCompletedEvent(
-                            event.orderId(),
-                            event.userId(),
-                            event.totalAmount(),
-                            productQuantities,
-                            PaymentStatus.FAILED
-
-                    )
-            );
-
-            log.info("❌ Emitted FAILED PaymentCompletedEvent for orderId={}", event.orderId());
         }
-    }
 
+        log.info("✅ Waiting for Stripe Webhook to confirm payment...");
 
-    private boolean simulatePaymentProcessing() {
-        return true; // sau false pentru testare
     }
 }
+

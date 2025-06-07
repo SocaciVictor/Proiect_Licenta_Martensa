@@ -7,20 +7,21 @@ export default function CancelScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    // Poți face redirect automat după 3 secunde
+    console.log("❌ Payment cancelled for orderId:", orderId);
+
     const timer = setTimeout(() => {
-      router.replace("/(tabs)/orders"); // sau o pagină de "Comenzi"
+      router.replace("/(tabs)/orders");
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [orderId]);
 
   return (
     <View className="flex-1 justify-center items-center bg-white">
       <ActivityIndicator size="large" color="#E53935" />
       <Text className="mt-4 text-lg text-red-600">Plata a fost anulată.</Text>
       <Text className="mt-2 text-sm text-gray-500">
-        Vei fi redirecționat către pagina principală...
+        Vei fi redirecționat către coșul de cumpărături...
       </Text>
     </View>
   );
