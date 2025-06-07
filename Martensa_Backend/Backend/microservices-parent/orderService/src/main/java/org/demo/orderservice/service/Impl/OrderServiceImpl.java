@@ -1,6 +1,7 @@
 package org.demo.orderservice.service.Impl;
 
 import org.bouncycastle.util.StoreException;
+import org.demo.orderservice.dto.request.ProductOrderRequest;
 import org.demo.orderservice.exception.StoreNotFoundException;
 import org.demo.orderservice.feign.StoreClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,23 +46,30 @@ public class OrderServiceImpl implements OrderService {
         }
 
         UserSummaryDto user = userClient.getUserByEmail(email);
-        List<ProductDTO> products = request.productIds().stream()
-                .map(productClient::getProductById)
+
+        List<ProductDTO> products = request.products().stream()
+                .map(p -> productClient.getProductById(p.productId()))
                 .toList();
 
         List<OrderItem> items = products.stream()
                 .map(p -> {
+                    int quantity = request.products().stream()
+                            .filter(rp -> rp.productId().equals(p.id()))
+                            .findFirst()
+                            .map(ProductOrderRequest::quantity)
+                            .orElse(1);
+
                     BigDecimal finalPrice = (p.discountPrice() != null) ? p.discountPrice() : p.price();
                     return OrderItem.builder()
                             .productId(p.id())
                             .productName(p.name())
                             .price(finalPrice)
-                            .quantity(1)
+                            .quantity(quantity)
                             .build();
                 })
                 .toList();
 
-
+        // 👉 Totalul corect
         BigDecimal total = items.stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -69,17 +77,31 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderMapper.toEntity(request, user.id(), items, total);
         items.forEach(item -> item.setOrder(order));
         order.setTotalAmount(total);
+        order.setShippingAddress(request.shippingAddress());
 
         Order saved = orderRepository.save(order);
+
+        List<ProductQuantity> productQuantities = items.stream()
+                .map(item -> new ProductQuantity(item.getProductId(), item.getQuantity()))
+                .toList();
 
         rabbitTemplate.convertAndSend(
                 rabbitProps.getOrder().getExchange(),
                 rabbitProps.getOrder().getRoutingKey(),
-                new OrderCreatedEvent(saved.getId(), saved.getUserId(), total, request.productIds(), saved.getPaymentMethod())
+                new OrderCreatedEvent(
+                        saved.getId(),
+                        saved.getUserId(),
+                        total,
+                        productQuantities,
+                        saved.getStoreId(),
+                        saved.getPaymentMethod()
+
+                )
         );
 
         return orderMapper.toResponse(saved);
     }
+
 
 
     @Override

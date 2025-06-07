@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
-import * as Linking from "expo-linking"; // important!!
+import * as Linking from "expo-linking"; // important!
 import { router, Stack } from "expo-router";
 import React, { useEffect } from "react";
 import Toast from "react-native-toast-message";
@@ -29,15 +29,27 @@ export default function RootLayout() {
     const subscription = Linking.addEventListener("url", ({ url }) => {
       console.log("🌐 Deep link received:", url);
 
-      if (url.startsWith("martensa://success")) {
-        const orderId = new URL(url).searchParams.get("orderId");
-        console.log("✅ Payment success for orderId:", orderId);
-        clearCart();
-        router.replace("/orders"); // sau pagina ta de succes
-      } else if (url.startsWith("martensa://cancel")) {
-        const orderId = new URL(url).searchParams.get("orderId");
-        console.log("❌ Payment cancelled for orderId:", orderId);
-        router.replace("/cart"); // sau pagina de eșec
+      try {
+        // Folosim URL API pt parsing robust
+        const parsedUrl = new URL(url);
+        const orderId = parsedUrl.searchParams.get("orderId");
+
+        if (
+          parsedUrl.protocol === "martensa:" &&
+          parsedUrl.pathname === "/success"
+        ) {
+          console.log("✅ Payment success for orderId:", orderId);
+          clearCart();
+          router.replace("/orders"); // navighezi la pagina de succes
+        } else if (
+          parsedUrl.protocol === "martensa:" &&
+          parsedUrl.pathname === "/cancel"
+        ) {
+          console.log("❌ Payment cancelled for orderId:", orderId);
+          router.replace("/cart"); // navighezi la pagina de eșec
+        }
+      } catch (err) {
+        console.error("❌ Error processing deep link:", err);
       }
     });
 

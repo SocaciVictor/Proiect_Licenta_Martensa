@@ -10,7 +10,7 @@ public record PaymentCompletedEvent(
         Long orderId,
         Long userId,
         BigDecimal amount,
-        PaymentStatus status,
-        List<ProductQuantity> productQuantities
+        List<ProductQuantity> products,
+        PaymentStatus status
 ) {
 }

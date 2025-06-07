@@ -3,6 +3,7 @@ package org.demo.orderservice.listeners;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.orderservice.dto.PaymentCompletedEvent;
+import org.demo.orderservice.dto.ProductQuantity;
 import org.demo.orderservice.model.Order;
 import org.demo.orderservice.model.enums.OrderStatus;
 import org.demo.orderservice.model.enums.PaymentStatus;
@@ -21,7 +22,7 @@ public class OrderListener {
 
     @RabbitListener(queues = "${rabbit.payment-response.queue}")
     public void handlePaymentResult(PaymentCompletedEvent event) {
-        log.info("⬅️ [x] Received PaymentCompletedEvent for orderId={}, status={}", event.orderId(), event.status());
+        log.info("⬅️ [x] Received PaymentCompletedEvent for orderId={}, status={}", event.orderId(), event.status(), event.products().size());
 
         try {
             orderRepository.findByIdWithItems(event.orderId()).ifPresentOrElse(order -> {
@@ -29,14 +30,21 @@ public class OrderListener {
                     order.setOrderStatus(OrderStatus.COMPLETED);
                     orderRepository.save(order);
 
-                    if (order.getStoreId() != null) {
-                        // Folosim lista din event → quantities 100% corecte:
-                        event.products().forEach(product -> {
-                            storeClient.decreaseStock(order.getStoreId(), product.productId(), product.quantity());
-                        });
-                        log.info("📉 Stock decreased for order {}", order.getId());
+                    if (order.getStoreId() != null && event.products() != null) {
+                        // Scădem stoc pe baza cantităților din ProductQuantity
+                        for (ProductQuantity pq : event.products()) {
+                            if (pq.quantity() > 0) {
+                                storeClient.decreaseStock(order.getStoreId(), pq.productId(), pq.quantity());
+                                log.info("📉 Decreased stock for productId={} with quantity={} in storeId={}",
+                                        pq.productId(), pq.quantity(), order.getStoreId());
+                            }
+                        }
                     } else {
-                        log.warn("⚠️ StoreId is null for order {}", order.getId());
+                        log.warn("⚠️ StoreId={}, ProductQuantities={} pentru order {}",
+                                order.getStoreId(),
+                                event.products(),
+                                order.getId());
+
                     }
 
                     log.info("✅ Order {} marked as COMPLETED", order.getId());

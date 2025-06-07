@@ -31,8 +31,9 @@ public class PaymentListener {
 
         boolean paymentOk = simulatePaymentProcessing();
 
-        // Mapăm produsele din OrderCreatedEvent în ProductQuantity:
-        List<ProductQuantity> productQuantities = event.products().stream()
+        // SAFE fallback pentru products null
+        List<ProductQuantity> productQuantities = (event.products() != null ? event.products() : List.<ProductQuantity>of())
+                .stream()
                 .map(p -> new ProductQuantity(p.productId(), p.quantity()))
                 .toList();
 
@@ -55,11 +56,14 @@ public class PaymentListener {
                             event.orderId(),
                             event.userId(),
                             event.totalAmount(),
-                            PaymentStatus.SUCCESS,
-                            productQuantities
+                            productQuantities,
+                            PaymentStatus.SUCCESS
+
                     )
             );
-
+            log.info("Payment COmpleted Evend", productQuantities);
+            log.info("<UNK> [x] Received OrderCreatedEvent for orderId={}", event.orderId());
+            log.info("total amount ",  event.totalAmount());
             log.info("✅ Emitted PaymentCompletedEvent for orderId={}", event.orderId());
         } else {
             rabbitTemplate.convertAndSend(
@@ -69,14 +73,16 @@ public class PaymentListener {
                             event.orderId(),
                             event.userId(),
                             event.totalAmount(),
-                            PaymentStatus.FAILED,
-                            productQuantities
+                            productQuantities,
+                            PaymentStatus.FAILED
+
                     )
             );
 
             log.info("❌ Emitted FAILED PaymentCompletedEvent for orderId={}", event.orderId());
         }
     }
+
 
     private boolean simulatePaymentProcessing() {
         return true; // sau false pentru testare

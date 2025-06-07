@@ -73,8 +73,8 @@ public class StripeWebhookController {
                                 orderId,
                                 userId,
                                 amount,
-                                PaymentStatus.SUCCESS,
-                                products
+                                products,
+                                PaymentStatus.SUCCESS
                         )
                 );
 

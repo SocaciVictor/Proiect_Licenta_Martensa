@@ -4,7 +4,7 @@ import java.util.List;
 
 public record OrderRequest(
         Long storeId,
-        List<Long> productIds,
+        List<ProductOrderRequest> products,
         String shippingAddress,
         String paymentMethod
 ) {}

@@ -24,7 +24,10 @@ export default function PaymentScreen() {
 
     const orderPayload = {
       storeId: selectedStoreId,
-      productIds: products.map((p) => p.id),
+      products: products.map((p) => ({
+        productId: p.id,
+        quantity: quantities[p.id] || 1,
+      })),
       shippingAddress: user?.address,
       paymentMethod: "CARD",
     };
@@ -39,6 +42,7 @@ export default function PaymentScreen() {
         currency: "RON",
       })),
     });
+
     console.log("Placing order with payload:", orderPayload);
     console.log("Checkout payload builder:", checkoutPayloadBuilder);
 
