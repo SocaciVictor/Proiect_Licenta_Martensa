@@ -162,6 +162,18 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </>
         )}
+        {authenticated && profile?.roles?.includes("ROLE_ADMIN") && (
+          <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+            <TouchableOpacity
+              onPress={() => router.push("/admin")}
+              className="border border-green-600 rounded-lg p-3 mb-4"
+            >
+              <Text className="text-center text-green-600 font-semibold">
+                Admin Dashboard
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
 
       {/* === Buton verde jos, doar pentru NELOGAT === */}

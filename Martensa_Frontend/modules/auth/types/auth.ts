@@ -106,6 +106,13 @@ export interface StoreResponse {
   availableServices: string;
 }
 
+export interface StoreProductStockDto {
+  id: number;
+  storeId: number;
+  productId: number;
+  quantity: number;
+}
+
 enum OrderStatus {
   PENDING = "PENDING",
   COMPLETED = "COMPLETED",

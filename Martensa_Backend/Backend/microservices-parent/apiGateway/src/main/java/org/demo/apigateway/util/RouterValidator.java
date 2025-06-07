@@ -15,7 +15,6 @@ public class RouterValidator {
             "/auth/validate",
             "/auth/token",
             "/products/category",
-            "/products",
             "/categories",
             "/promotions/product",
             "/payments/**"

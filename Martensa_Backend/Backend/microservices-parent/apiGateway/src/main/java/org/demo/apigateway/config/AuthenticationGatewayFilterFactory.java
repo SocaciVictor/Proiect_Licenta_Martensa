@@ -32,6 +32,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
 
     public AuthenticationGatewayFilterFactory() {
         super(Config.class);
+        System.out.println("🔥 AuthenticationGatewayFilterFactory REGISTERED");
     }
 
     @Override
@@ -62,6 +63,12 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                             List<String> roles = (List<String>) claims.get("roles");
                             String method = request.getMethod().name();
 
+                            // 🔥 Aici log nou adaugat
+                            System.out.println("SecuredMethods: " + config.getSecuredMethods());
+                            System.out.println("RequiredRoles: " + config.getRequiredRoles());
+                            System.out.println("Method: " + method);
+                            System.out.println("User roles: " + roles);
+
                             if (config.getSecuredMethods().contains(method)) {
                                 boolean hasAccess = roles != null &&
                                         config.getRequiredRoles().stream().anyMatch(roles::contains);
@@ -89,11 +96,15 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         return exchange.getResponse().setComplete();
     }
 
+    @Override
+    public List<String> shortcutFieldOrder() {
+        return List.of("requiredRoles", "securedMethods");
+    }
+
     @Setter
     @Getter
     public static class Config {
         private List<String> requiredRoles = List.of();
         private List<String> securedMethods = List.of();
     }
-
 }
