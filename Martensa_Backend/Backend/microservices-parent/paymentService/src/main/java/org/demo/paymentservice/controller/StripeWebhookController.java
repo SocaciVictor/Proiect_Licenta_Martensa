@@ -72,15 +72,16 @@ public class StripeWebhookController {
 
         processedWebhookRepository.save(new ProcessedWebhook(eventId));
 
-        if ("checkout.session.completed".equals(event.getType())) {
-            log.info("✅ Processing checkout.session.completed");
+        try {
+            Stripe.apiKey = stripeProperties.getSecretKey();
 
-            Session session = (Session) event.getDataObjectDeserializer()
-                    .getObject()
-                    .orElseThrow(() -> new IllegalStateException("Invalid session object"));
+            // CASE 1 - SUCCESS
+            if ("checkout.session.completed".equals(event.getType())) {
+                log.info("✅ Processing checkout.session.completed");
 
-            try {
-                Stripe.apiKey = stripeProperties.getSecretKey();
+                Session session = (Session) event.getDataObjectDeserializer()
+                        .getObject()
+                        .orElseThrow(() -> new IllegalStateException("Invalid session object"));
 
                 String paymentIntentId = session.getPaymentIntent();
                 PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
@@ -110,15 +111,51 @@ public class StripeWebhookController {
                         )
                 );
 
-                log.info("✅ Emitted PaymentCompletedEvent for orderId={} userId={} amount={} products={}",
+                log.info("✅ Emitted PaymentCompletedEvent SUCCESS for orderId={} userId={} amount={} products={}",
                         orderId, userId, amount, products);
-
-            } catch (Exception e) {
-                log.error("💥 Error processing checkout.session.completed webhook", e);
             }
 
-        } else {
-            log.info("ℹ️ Ignored event type: {}", event.getType());
+            // CASE 2 - FAILED
+            else if ("payment_intent.payment_failed".equals(event.getType())) {
+                log.info("✅ Processing payment_intent.payment_failed");
+
+                PaymentIntent intent = (PaymentIntent) event.getDataObjectDeserializer()
+                        .getObject()
+                        .orElseThrow(() -> new IllegalStateException("Invalid PaymentIntent object"));
+
+                Map<String, String> metadata = intent.getMetadata();
+
+                log.info("🎁 PaymentIntent metadata = {}", metadata);
+
+                Long orderId = Long.parseLong(metadata.get("orderId"));
+                Long userId = Long.parseLong(metadata.get("userId"));
+
+                String productsJson = metadata.get("products");
+                List<ProductQuantity> products = objectMapper.readValue(productsJson, new TypeReference<>() {});
+
+                rabbitTemplate.convertAndSend(
+                        rabbitProps.getOrderResponse().getExchange(),
+                        rabbitProps.getOrderResponse().getRoutingKey(),
+                        new PaymentCompletedEvent(
+                                orderId,
+                                userId,
+                                BigDecimal.ZERO, // Amount irrelevant for failed
+                                products,
+                                PaymentStatus.FAILED
+                        )
+                );
+
+                log.info("✅ Emitted PaymentCompletedEvent FAILED for orderId={} userId={} products={}",
+                        orderId, userId, products);
+            }
+
+            // OTHER EVENTS
+            else {
+                log.info("ℹ️ Ignored event type: {}", event.getType());
+            }
+
+        } catch (Exception e) {
+            log.error("💥 Error processing Stripe webhook", e);
         }
 
         return ResponseEntity.ok("Webhook processed");

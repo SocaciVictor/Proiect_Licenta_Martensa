@@ -45,7 +45,7 @@ export default function AdminAddStoreScreen() {
       });
 
       Alert.alert("Succes", "Magazin adăugat cu succes!");
-      router.replace("/admin/stores"); // te întorci la lista de stores
+      router.replace("/admin/stores");
     } catch (err) {
       console.error("Eroare la adăugare store:", err);
       Alert.alert("Eroare", "A apărut o eroare la adăugarea magazinului.");

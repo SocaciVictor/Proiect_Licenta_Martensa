@@ -9,9 +9,9 @@ export default function SuccessScreen() {
   const router = useRouter();
   const clearCart = useCartStore((state) => state.clearCart);
 
-  const [attempt, setAttempt] = useState(0); // nr de încercări
-  const MAX_ATTEMPTS = 5; // maxim 10 încercări (~15-20 sec)
-  const POLLING_INTERVAL = 2000; // 2 secunde între încercări
+  const [attempt, setAttempt] = useState(0);
+  const MAX_ATTEMPTS = 5;
+  const POLLING_INTERVAL = 2000;
 
   useEffect(() => {
     let pollingInterval: any;
@@ -27,10 +27,14 @@ export default function SuccessScreen() {
           console.log("✅ Comanda COMPLETED");
           clearCart();
           alert("✅ Plata reușită! Comanda este COMPLETĂ.");
-          router.replace("/"); // redirect home
+          router.replace("/");
+        } else if (res.data === "FAILED") {
+          console.log("❌ Comanda FAILED");
+          alert("❌ Plata a eșuat. Comanda a fost anulată.");
+          router.replace("/(tabs)/orders");
         } else if (attempt >= MAX_ATTEMPTS - 1) {
           console.log(
-            "⚠️ Timeout: comanda nu a devenit COMPLETED în timp util."
+            "⚠️ Timeout: comanda nu a devenit COMPLETED sau FAILED în timp util."
           );
           alert(
             "⚠️ Plata nu a fost confirmată încă. Verifică istoricul comenzilor mai târziu."
@@ -56,7 +60,7 @@ export default function SuccessScreen() {
       pollingInterval = setInterval(pollOrderStatus, POLLING_INTERVAL);
     }
 
-    return () => clearInterval(pollingInterval); // cleanup când se închide ecranul
+    return () => clearInterval(pollingInterval);
   }, [orderId, attempt]);
 
   return (
