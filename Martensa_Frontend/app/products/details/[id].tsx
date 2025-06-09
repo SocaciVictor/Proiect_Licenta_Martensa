@@ -1,6 +1,6 @@
 import { ProductDetailsResponse } from "@/modules/auth/types/auth";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
-import apiClient from "@/services/apiClient";
+import apiClientNoAuth from "@/services/apiClientNoAuth";
 import { showToast } from "@/utils/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -24,7 +24,7 @@ export default function ProductDetailsScreen() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await apiClient.get<ProductDetailsResponse>(
+        const res = await apiClientNoAuth.get<ProductDetailsResponse>(
           `/products/${id}`
         );
         setProduct(res.data);

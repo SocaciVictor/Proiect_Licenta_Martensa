@@ -11,11 +11,13 @@ import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.paymentservice.config.PaymentRabbitProperties;
+import org.demo.paymentservice.config.StripeProperties;
 import org.demo.paymentservice.dto.PaymentCompletedEvent;
 import org.demo.paymentservice.dto.ProductQuantity;
+import org.demo.paymentservice.model.ProcessedWebhook;
 import org.demo.paymentservice.model.enums.PaymentStatus;
+import org.demo.paymentservice.repository.ProcessedWebhookRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,27 +33,44 @@ public class StripeWebhookController {
 
     private final RabbitTemplate rabbitTemplate;
     private final PaymentRabbitProperties rabbitProps;
+    private final StripeProperties stripeProperties;
+    private final ProcessedWebhookRepository processedWebhookRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Value("${stripe.webhook.secret}")
-    private String endpointSecret;
-
-    @Value("${stripe.secretKey}")
-    private String secretKey;
 
     @PostMapping
     public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload,
                                                       @RequestHeader("Stripe-Signature") String sigHeader) {
         log.info("⬅️ [x] Received Stripe Webhook! Payload = {}", payload);
 
-        Event event;
+        Event event = null;
+        boolean verified = false;
 
-        try {
-            event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
-        } catch (SignatureVerificationException e) {
-            log.error("❌ Webhook signature verification failed.", e);
+        // Verificare semnătură cu toate secretele din config
+        for (String secret : stripeProperties.getWebhookSecrets()) {
+            try {
+                event = Webhook.constructEvent(payload, sigHeader, secret);
+                verified = true;
+                break;
+            } catch (SignatureVerificationException e) {
+                // Ignor, încerc cu următorul secret
+            }
+        }
+
+        if (!verified) {
+            log.error("❌ Webhook signature verification failed.");
             return ResponseEntity.badRequest().body("Invalid signature");
         }
+
+        log.info("✅ Webhook verified. Event type: {}", event.getType());
+
+        String eventId = event.getId();
+
+        if (processedWebhookRepository.existsByEventId(eventId)) {
+            log.warn("⚠️ Webhook event {} already processed. Skipping.", eventId);
+            return ResponseEntity.ok("Event already processed");
+        }
+
+        processedWebhookRepository.save(new ProcessedWebhook(eventId));
 
         if ("checkout.session.completed".equals(event.getType())) {
             log.info("✅ Processing checkout.session.completed");
@@ -61,16 +80,14 @@ public class StripeWebhookController {
                     .orElseThrow(() -> new IllegalStateException("Invalid session object"));
 
             try {
-                Stripe.apiKey = secretKey; // setezi cheia Stripe
+                Stripe.apiKey = stripeProperties.getSecretKey();
 
-                // 🟢 Retrieve metadata din PaymentIntent:
                 String paymentIntentId = session.getPaymentIntent();
                 PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
                 Map<String, String> metadata = intent.getMetadata();
 
                 log.info("🎁 PaymentIntent metadata = {}", metadata);
 
-                // 🟢 Extragem valori:
                 Long orderId = Long.parseLong(metadata.get("orderId"));
                 Long userId = Long.parseLong(metadata.get("userId"));
 
@@ -81,7 +98,6 @@ public class StripeWebhookController {
                 String productsJson = metadata.get("products");
                 List<ProductQuantity> products = objectMapper.readValue(productsJson, new TypeReference<>() {});
 
-                // 🟢 Emit PaymentCompletedEvent
                 rabbitTemplate.convertAndSend(
                         rabbitProps.getOrderResponse().getExchange(),
                         rabbitProps.getOrderResponse().getRoutingKey(),

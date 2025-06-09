@@ -3,7 +3,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 const apiClient = axios.create({
-  baseURL: "http://192.168.1.13:8090", // adresa API Gateway
+  baseURL: "http://192.168.1.131:8090", // adresa API Gateway
   headers: { "Content-Type": "application/json" },
 });
 
@@ -14,3 +14,4 @@ apiClient.interceptors.request.use(async (config) => {
 });
 
 export default apiClient;
+2;

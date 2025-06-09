@@ -50,5 +50,6 @@ rabbit:
 
 stripe:
   secretKey: "sk_test_51RSzJM2SIPTdAEhYlqHrdWbO2MJiPzqQMbcgLZsfkLkxhiWigYzwFxKltEMO6YfvlGkuwxAK9paHHzO1065N913F00ASR40GQs"
-  webhook:
-    secret: whsec_f7165714cc8a71f174b519889e24e592b08f33e89e844e18aa885a5df738cb28
+  webhookSecrets:
+    - whsec_3Aa1L1twcbfI0qTNr0EDc9RZLmJRxIjA
+    - whsec_f7165714cc8a71f174b519889e24e592b08f33e89e844e18aa885a5df738cb28

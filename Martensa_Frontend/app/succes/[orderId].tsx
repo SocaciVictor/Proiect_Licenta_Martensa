@@ -10,7 +10,7 @@ export default function SuccessScreen() {
   const clearCart = useCartStore((state) => state.clearCart);
 
   const [attempt, setAttempt] = useState(0); // nr de încercări
-  const MAX_ATTEMPTS = 10; // maxim 10 încercări (~15-20 sec)
+  const MAX_ATTEMPTS = 5; // maxim 10 încercări (~15-20 sec)
   const POLLING_INTERVAL = 2000; // 2 secunde între încercări
 
   useEffect(() => {

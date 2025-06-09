@@ -21,20 +21,20 @@ interface StoreProductStockDto {
 
 export default function AdminStoreStockScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const storeId = id ? Number(id) : undefined;
 
   const [store, setStore] = useState<{ name: string } | null>(null);
   const [storeStock, setStoreStock] = useState<StoreProductStockDto[]>([]);
   const [allProducts, setAllProducts] = useState<ProductResponse[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
-  );
+  const [selectedProductId, setSelectedProductId] = useState<number>(0);
   const [quantity, setQuantity] = useState<string>("");
 
   // Fetch store info
   const fetchStore = async () => {
+    if (storeId === undefined) return;
     try {
-      const response = await apiClient.get(`/stores/${id}`);
+      const response = await apiClient.get(`/stores/${storeId}`);
       setStore(response.data);
     } catch (err) {
       console.error("Eroare la fetch store:", err);
@@ -43,9 +43,10 @@ export default function AdminStoreStockScreen() {
 
   // Fetch stock
   const fetchStock = async () => {
+    if (storeId === undefined) return;
     try {
       const response = await apiClient.get<StoreProductStockDto[]>(
-        `/stores/${id}/stock`
+        `/stores/${storeId}/stock`
       );
       setStoreStock(response.data);
     } catch (err) {
@@ -65,18 +66,23 @@ export default function AdminStoreStockScreen() {
 
   // Add stock
   const handleAddStock = async () => {
-    if (!selectedProductId || !quantity) {
+    if (!selectedProductId || selectedProductId === 0 || !quantity) {
       Alert.alert("Eroare", "Selectează un produs și introdu cantitatea.");
       return;
     }
 
+    if (storeId === undefined) {
+      console.error("Store ID undefined!");
+      return;
+    }
+
     try {
-      await apiClient.post(`/stores/${id}/stock`, {
+      await apiClient.post(`/stores/${storeId}/stock`, {
         productId: selectedProductId,
         quantity: parseInt(quantity),
       });
 
-      setSelectedProductId(null);
+      setSelectedProductId(0);
       setQuantity("");
       fetchStock();
     } catch (err) {
@@ -91,10 +97,13 @@ export default function AdminStoreStockScreen() {
   };
 
   useEffect(() => {
-    fetchStore();
-    fetchStock();
-    fetchProducts();
-  }, []);
+    if (storeId !== undefined) {
+      fetchStore();
+      fetchStock();
+      fetchProducts();
+    }
+    console.log("Store ID:", storeId);
+  }, [storeId]);
 
   return (
     <View className="flex-1 bg-white p-4">
@@ -139,7 +148,7 @@ export default function AdminStoreStockScreen() {
           padding: 8,
         }}
       >
-        <Picker.Item label="Selectează produs" value={null} />
+        <Picker.Item label="Selectează produs" value={0} />
         {allProducts.map((product) => (
           <Picker.Item
             key={product.id}
