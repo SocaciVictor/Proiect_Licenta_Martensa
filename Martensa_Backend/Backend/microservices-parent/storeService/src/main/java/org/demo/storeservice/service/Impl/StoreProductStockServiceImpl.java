@@ -34,7 +34,7 @@ public class StoreProductStockServiceImpl implements StoreProductStockService {
                         .productId(request.productId())
                         .build());
 
-        stock.setQuantity(request.quantity());
+        stock.setQuantity(request.quantity()+stock.getQuantity());
         return mapper.toDto(stockRepository.save(stock));
     }
 
