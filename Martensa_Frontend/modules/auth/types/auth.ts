@@ -55,6 +55,7 @@ export interface ProductResponse {
   price: number;
   discountPrice?: number;
   imageUrl: string;
+  activePromotionDiscount?: number;
 }
 
 export interface ProductDetailsResponse {

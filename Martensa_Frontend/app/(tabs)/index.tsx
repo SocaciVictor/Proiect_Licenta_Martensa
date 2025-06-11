@@ -1,11 +1,21 @@
 import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
+import { useUserPromotions } from "@/modules/benefits/hooks/useUserPromotions";
+import ProductPromoCard from "@/modules/products/components/ProductPromoCard";
 import SearchOverlay from "@/modules/products/components/SearchOverlay";
+import { useProductsAll } from "@/modules/products/hooks/useProductsAll";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const profile = useUserProfile();
   const points = profile?.loyaltyCard?.points ?? 0;
   const name = profile?.firstName ?? "Utilizator";
+
+  const { promotedProductIds, loading: loadingPromos } = useUserPromotions();
+  const { products, loading: loadingProducts } = useProductsAll();
+
+  const promotedProducts = products.filter((product) =>
+    promotedProductIds.includes(product.id)
+  );
 
   return (
     <View className="flex-1 bg-white relative">
@@ -75,6 +85,25 @@ export default function HomeScreen() {
                 </View>
               </View>
             </ScrollView>
+
+            {/* 🛍️ Produse cu promoții active */}
+            <Text className="text-xl font-bold text-black mb-4">
+              Produse cu promoții active
+            </Text>
+
+            {loadingPromos || loadingProducts ? (
+              <Text>Se încarcă...</Text>
+            ) : promotedProducts.length === 0 ? (
+              <Text className="text-gray-500">
+                Nu ai produse cu promoții active.
+              </Text>
+            ) : (
+              <View className="flex-row flex-wrap justify-between">
+                {promotedProducts.map((product) => (
+                  <ProductPromoCard key={product.id} product={product} />
+                ))}
+              </View>
+            )}
           </>
         )}
       </ScrollView>

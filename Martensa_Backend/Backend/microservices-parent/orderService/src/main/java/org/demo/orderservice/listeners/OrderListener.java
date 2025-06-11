@@ -9,6 +9,7 @@ import org.demo.orderservice.model.enums.OrderStatus;
 import org.demo.orderservice.model.enums.PaymentStatus;
 import org.demo.orderservice.repository.OrderRepository;
 import org.demo.orderservice.feign.StoreClient;
+import org.demo.orderservice.service.Impl.LoyaltyPointsPublisher;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ public class OrderListener {
 
     private final OrderRepository orderRepository;
     private final StoreClient storeClient;
+    private final LoyaltyPointsPublisher loyaltyPointsPublisher;
 
     @RabbitListener(queues = "${rabbit.payment-response.queue}")
     public void handlePaymentResult(PaymentCompletedEvent event) {
@@ -46,6 +48,10 @@ public class OrderListener {
                                 order.getId());
                     }
 
+                    // Loyalty Points Event
+                    loyaltyPointsPublisher.sendLoyaltyPointsEvent(order.getUserId(), order.getTotalAmount());
+                    log.info("🏅 LoyaltyPointsEvent sent for userId={} amount={}", order.getUserId(), order.getTotalAmount());
+
                     log.info("✅ Order {} marked as COMPLETED", order.getId());
                 } else {
                     order.setOrderStatus(OrderStatus.FAILED);
@@ -60,5 +66,5 @@ public class OrderListener {
             log.error("💥 Exception while processing PaymentCompletedEvent: {}", e.getMessage(), e);
         }
     }
-
 }
+

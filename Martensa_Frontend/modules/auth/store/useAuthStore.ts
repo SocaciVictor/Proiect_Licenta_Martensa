@@ -80,25 +80,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (data) => {
     try {
       const response = await authService.login(data);
+
+      // 1️⃣ salvezi token-ul
       await SecureStore.setItemAsync(TOKEN_KEY, response.token);
-      const decoded = decodeJwt(response.token);
-      const email = decoded?.email || decoded?.sub || null;
 
-      set({ token: response.token, authenticated: true, email });
+      // 2️⃣ setezi token provizoriu ca să fie disponibil în store (dacă vrei să arăți ceva imediat)
+      set({ token: response.token, authenticated: true });
 
-      if (email) {
-        try {
-          const userResponse = await apiClient.get("/users/me", {
-            headers: { "X-User-Email": email },
-          });
-
-          const userId = userResponse.data.id;
-          set({ userId });
-        } catch (err) {
-          console.error("Eroare la fetch userId:", err);
-          set({ userId: null });
-        }
-      }
+      // 3️⃣ initAuth → face validare + setează email, user, userId etc.
+      await useAuthStore.getState().initAuth();
 
       return response;
     } catch (e: any) {
@@ -112,27 +102,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (data) => {
     try {
       const response = await authService.register(data);
+
       await SecureStore.setItemAsync(TOKEN_KEY, response.token);
-      const decoded = decodeJwt(response.token);
-      const email = decoded?.email || decoded?.sub || null;
 
-      set({ token: response.token, authenticated: true, email });
+      set({ token: response.token, authenticated: true });
 
-      // ✅ după register → fetch userId
-      if (email) {
-        try {
-          const userResponse = await apiClient.get("/users/me", {
-            headers: { "X-User-Email": email },
-          });
-
-          const userId = userResponse.data.id;
-          set({ userId });
-          console.log("User ID after registration:", userId);
-        } catch (err) {
-          console.error("Eroare la fetch userId:", err);
-          set({ userId: null });
-        }
-      }
+      await useAuthStore.getState().initAuth();
 
       return response;
     } catch (e: any) {
@@ -146,6 +121,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     try {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
+
+      // Reset state
       set({
         token: null,
         authenticated: false,
@@ -153,6 +130,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         userId: null,
         user: null,
       });
+
+      // Fac din nou initAuth pentru a forța refresh pe componente
+      await useAuthStore.getState().initAuth();
     } catch (err) {
       console.error("Eroare la logout:", err);
     }

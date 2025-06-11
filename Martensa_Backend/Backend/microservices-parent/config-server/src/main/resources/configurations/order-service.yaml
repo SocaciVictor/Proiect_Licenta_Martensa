@@ -48,3 +48,7 @@ rabbit:
     routing-key: payment.response.routing-key
     queue: payment.response.queue
 
+  loyalty-points:
+    exchange: loyalty.points.exchange
+    routing-key: loyalty.points.routing-key
+    queue: loyalty.points.queue

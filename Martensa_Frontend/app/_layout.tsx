@@ -1,14 +1,15 @@
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
-import * as Linking from "expo-linking"; // important!
+import * as Linking from "expo-linking";
 import { router, Stack } from "expo-router";
 import React, { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import "../globals.css";
-import { AuthProvider } from "./context/AuthContext"; // păstrezi pentru layout fallback
+import { AuthProvider } from "./context/AuthContext";
 
 export default function RootLayout() {
   const initAuth = useAuthStore((state) => state.initAuth);
+  const authenticated = useAuthStore((state) => state.authenticated); // adaugam observare pe authenticated
   const fetchCart = useCartStore((state) => state.fetchCart);
   const clearCart = useCartStore((state) => state.clearCart);
 
@@ -24,13 +25,24 @@ export default function RootLayout() {
     init();
   }, []);
 
+  // 🔥 Adaugam useEffect reactiv pe authenticated
+  useEffect(() => {
+    const refresh = async () => {
+      await initAuth();
+      if (useAuthStore.getState().authenticated) {
+        fetchCart();
+      }
+    };
+
+    refresh();
+  }, [authenticated]);
+
   // Global deep link handler → Stripe success / cancel
   useEffect(() => {
     const subscription = Linking.addEventListener("url", ({ url }) => {
       console.log("🌐 Deep link received:", url);
 
       try {
-        // Folosim URL API pt parsing robust
         const parsedUrl = new URL(url);
         const orderId = parsedUrl.searchParams.get("orderId");
 
@@ -40,13 +52,13 @@ export default function RootLayout() {
         ) {
           console.log("✅ Payment success for orderId:", orderId);
           clearCart();
-          router.replace("/orders"); // navighezi la pagina de succes
+          router.replace("/orders");
         } else if (
           parsedUrl.protocol === "martensa:" &&
           parsedUrl.pathname === "/cancel"
         ) {
           console.log("❌ Payment cancelled for orderId:", orderId);
-          router.replace("/cart"); // navighezi la pagina de eșec
+          router.replace("/cart");
         }
       } catch (err) {
         console.error("❌ Error processing deep link:", err);
