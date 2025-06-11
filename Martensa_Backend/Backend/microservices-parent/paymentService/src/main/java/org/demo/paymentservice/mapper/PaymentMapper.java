@@ -20,7 +20,6 @@ public interface PaymentMapper {
     @Mapping(target = "paymentDate", source = "payment.paymentDate")
     PaymentResponse toPaymentResponse(Payment payment, UserSummaryResponse userProfileResponse);
 
-    // default method → mapezi UserProfileResponse în UserSummaryResponse
     default UserSummaryResponse toUserSummaryResponse(UserSummaryResponse userProfileResponse) {
         if (userProfileResponse == null) {
             return null;
