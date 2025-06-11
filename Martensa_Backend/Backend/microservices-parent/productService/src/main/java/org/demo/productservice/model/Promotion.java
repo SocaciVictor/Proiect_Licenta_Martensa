@@ -37,4 +37,10 @@ public class Promotion {
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private List<Product> products;
+
+    @ElementCollection
+    @CollectionTable(name = "promotion_user", joinColumns = @JoinColumn(name = "promotion_id"))
+    @Column(name = "user_id")
+    private List<Long> userIds;
+
 }

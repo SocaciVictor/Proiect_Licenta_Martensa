@@ -1,15 +1,14 @@
-import { Payment } from "@/modules/auth/types/auth";
+import { PaymentResponse } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
 import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
 export default function AdminPaymentsScreen() {
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaymentResponse[]>([]);
 
   const fetchPayments = async () => {
     try {
-      // Fetch pt toti userii → modifici endpointul la tine dacă e nevoie
-      const response = await apiClient.get<Payment[]>("/payments/user/1"); // ex userId=1 (înlocuiești cu ceva generic)
+      const response = await apiClient.get<PaymentResponse[]>("/payments/all");
       setPayments(response.data);
     } catch (err) {
       console.error("Eroare la fetch payments:", err);
@@ -28,11 +27,19 @@ export default function AdminPaymentsScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View className="border-b border-gray-200 py-3">
-            <Text className="font-semibold">Plată #{item.id}</Text>
-            <Text className="text-gray-600">Utilizator: {item.userId}</Text>
-            <Text className="text-gray-600">Comandă: {item.orderId}</Text>
-            <Text className="text-gray-600">Suma: {item.amount} Lei</Text>
-            <Text className="text-gray-600">Status: {item.paymentStatus}</Text>
+            <Text className="font-semibold mb-1">Plată #{item.id}</Text>
+            <Text className="text-gray-600 mb-1">
+              Utilizator: {item.userSummaryResponse.firstName}{" "}
+              {item.userSummaryResponse.lastName} (
+              {item.userSummaryResponse.email})
+            </Text>
+            <Text className="text-gray-600 mb-1">Comandă: {item.orderId}</Text>
+            <Text className="text-gray-600 mb-1">Suma: {item.amount} Lei</Text>
+            <Text className="text-gray-600 mb-1">Status: {item.status}</Text>
+            <Text className="text-gray-600 mb-1">Metodă: {item.method}</Text>
+            <Text className="text-gray-600">
+              Dată plată: {item.paymentDate.toString()}
+            </Text>
           </View>
         )}
       />

@@ -53,6 +53,7 @@ export interface ProductResponse {
   id: number;
   name: string;
   price: number;
+  discountPrice?: number;
   imageUrl: string;
 }
 
@@ -164,3 +165,29 @@ export interface CategoryResponse {
   id: number;
   name: string;
 }
+
+export interface PaymentResponse {
+  id: number;
+  orderId: number;
+  userSummaryResponse: UserSummaryResponse;
+  amount: number;
+  status: PaymentStatus;
+  method: string;
+  paymentDate: Date;
+}
+
+export enum PromotionType {
+  ALL = "ALL",
+  CUSTOM = "CUSTOM",
+}
+
+export type PromotionDto = {
+  id: number;
+  title: string;
+  description: string;
+  discountPercentage: number;
+  startDate: string;
+  endDate: string;
+  promotionType: PromotionType;
+  productIds: number[];
+};

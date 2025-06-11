@@ -11,4 +11,8 @@ public interface PromotionService {
     List<PromotionDto> getPromotionsForProduct(Long productId);
 
     void deletePromotion(Long id);
+
+    List<PromotionDto> getAllPromotions();
+
+    List<PromotionDto> getPromotionsForUser(Long userId);
 }

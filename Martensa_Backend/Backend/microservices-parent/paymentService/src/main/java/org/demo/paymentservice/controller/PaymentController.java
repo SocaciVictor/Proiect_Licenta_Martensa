@@ -1,6 +1,7 @@
 package org.demo.paymentservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.paymentservice.dto.PaymentResponse;
 import org.demo.paymentservice.model.Payment;
 import org.demo.paymentservice.service.PaymentService;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,11 @@ public class PaymentController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Payment>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(paymentService.getPaymentsByUserId(userId));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PaymentResponse>> getAllPayments(){
+        return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
 

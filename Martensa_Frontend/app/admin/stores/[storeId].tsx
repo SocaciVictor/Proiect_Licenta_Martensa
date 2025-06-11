@@ -1,6 +1,5 @@
 import { ProductResponse } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
-import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -8,7 +7,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -25,15 +23,18 @@ interface StoreProductStockDto {
 export default function AdminStoreStockScreen() {
   const router = useRouter();
 
-  // ATENTIE la param → tu în URL ai /admin/stores/[storeId]
   const { storeId } = useLocalSearchParams<{ storeId?: string }>();
   const storeIdNumber = storeId ? Number(storeId) : undefined;
 
   const [store, setStore] = useState<{ name: string } | null>(null);
   const [storeStock, setStoreStock] = useState<StoreProductStockDto[]>([]);
   const [allProducts, setAllProducts] = useState<ProductResponse[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState<number>(0);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductResponse | null>(null);
   const [quantity, setQuantity] = useState<string>("");
+
+  const [searchStockQuery, setSearchStockQuery] = useState<string>("");
+  const [searchProductQuery, setSearchProductQuery] = useState<string>("");
 
   // Fetch store info
   const fetchStore = async () => {
@@ -71,7 +72,7 @@ export default function AdminStoreStockScreen() {
 
   // Add stock
   const handleAddStock = async () => {
-    if (!selectedProductId || selectedProductId === 0 || !quantity) {
+    if (!selectedProduct || !quantity) {
       Alert.alert("Eroare", "Selectează un produs și introdu cantitatea.");
       return;
     }
@@ -83,11 +84,11 @@ export default function AdminStoreStockScreen() {
 
     try {
       await apiClient.post(`/stores/${storeIdNumber}/stock`, {
-        productId: selectedProductId,
+        productId: selectedProduct.id,
         quantity: parseInt(quantity),
       });
 
-      setSelectedProductId(0);
+      setSelectedProduct(null);
       setQuantity("");
       fetchStock();
     } catch (err) {
@@ -101,13 +102,23 @@ export default function AdminStoreStockScreen() {
     return product ? product.name : `Produs ID: ${productId}`;
   };
 
+  // Filtered stock pt search in stock
+  const filteredStock = storeStock.filter((item) => {
+    const productName = getProductName(item.productId).toLowerCase();
+    return productName.includes(searchStockQuery.toLowerCase());
+  });
+
+  // Filtered products pt search la adăugare produs nou
+  const filteredProducts = allProducts.filter((product) =>
+    product.name.toLowerCase().includes(searchProductQuery.toLowerCase())
+  );
+
   useEffect(() => {
     if (storeIdNumber !== undefined) {
       fetchStore();
       fetchStock();
       fetchProducts();
     }
-    console.log("Store ID:", storeIdNumber);
   }, [storeIdNumber]);
 
   return (
@@ -115,77 +126,111 @@ export default function AdminStoreStockScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-white"
     >
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Header */}
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <Text className="text-green-600 text-base">← Back</Text>
-        </TouchableOpacity>
+      <FlatList
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          <>
+            {/* Header */}
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="mb-4 mt-4 px-4"
+            >
+              <Text className="text-green-600 text-base">← Back</Text>
+            </TouchableOpacity>
 
-        <Text className="text-2xl font-bold mb-4">Admin Panel</Text>
-        <Text className="text-xl font-bold mb-2">
-          Magazin: {store?.name || "-"}
-        </Text>
+            <Text className="text-2xl font-bold mb-4 px-4">Admin Panel</Text>
+            <Text className="text-xl font-bold mb-2 px-4">
+              Magazin: {store?.name || "-"}
+            </Text>
 
-        {/* Lista stock */}
-        <Text className="text-lg font-semibold mb-2">Stoc produse</Text>
-        <FlatList
-          data={storeStock}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View className="border-b border-gray-200 py-3">
-              <Text className="text-black">
-                {getProductName(item.productId)} | Cantitate: {item.quantity}
-              </Text>
-            </View>
-          )}
-          scrollEnabled={false} // important pt ScrollView nesting
-        />
-
-        {/* Adaugă stoc */}
-        <Text className="text-lg font-semibold mb-2 mt-6">
-          Adaugă stoc produs nou
-        </Text>
-
-        {/* Dropdown produs */}
-        <Picker
-          selectedValue={selectedProductId}
-          onValueChange={(itemValue) => setSelectedProductId(itemValue)}
-          style={{
-            borderWidth: 1,
-            borderColor: "#ccc",
-            borderRadius: 8,
-            marginBottom: 8,
-            padding: 8,
-          }}
-        >
-          <Picker.Item label="Selectează produs" value={0} />
-          {allProducts.map((product) => (
-            <Picker.Item
-              key={product.id}
-              label={product.name}
-              value={product.id}
+            {/* Search stock */}
+            <TextInput
+              placeholder="Caută produs în stoc..."
+              value={searchStockQuery}
+              onChangeText={setSearchStockQuery}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 mx-4"
             />
-          ))}
-        </Picker>
 
-        {/* Cantitate */}
-        <TextInput
-          placeholder="Cantitate"
-          value={quantity}
-          onChangeText={setQuantity}
-          keyboardType="numeric"
-          className="border border-gray-300 rounded-md px-4 py-2 mb-4"
-        />
+            <Text className="text-lg font-semibold mb-2 px-4">
+              Stoc produse
+            </Text>
+          </>
+        }
+        data={filteredStock}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View className="border-b border-gray-200 py-3 px-4">
+            <Text className="text-black font-semibold">
+              {getProductName(item.productId)}
+            </Text>
+            <Text className="text-gray-600">Cantitate: {item.quantity}</Text>
+          </View>
+        )}
+        ListFooterComponent={
+          <>
+            {/* Search produse */}
+            <Text className="text-lg font-semibold mb-2 mt-6 px-4">
+              Adaugă stoc produs nou
+            </Text>
 
-        <TouchableOpacity
-          onPress={handleAddStock}
-          className="bg-green-600 rounded-lg py-3 px-6 mb-6"
-        >
-          <Text className="text-white text-center text-lg font-semibold">
-            Adaugă stoc
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+            <TextInput
+              placeholder="Caută produs..."
+              value={searchProductQuery}
+              onChangeText={setSearchProductQuery}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 mx-4"
+            />
+
+            {filteredProducts.map((product) => (
+              <TouchableOpacity
+                key={product.id}
+                onPress={() => setSelectedProduct(product)}
+                className="border border-gray-300 rounded-lg px-4 py-3 mb-3 bg-gray-50 mx-4"
+              >
+                <Text className="text-black font-semibold">{product.name}</Text>
+                <Text className="text-gray-500 text-sm mt-1">
+                  {product.price} Lei
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            {/* Zona de adaugă cantitate */}
+            {selectedProduct && (
+              <View className="mt-8 px-4 mb-10">
+                <View className="mb-6 p-4 border border-green-600 rounded-md bg-green-50">
+                  <Text className="text-green-800 font-semibold mb-2">
+                    Produs selectat: {selectedProduct.name}
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={() => setSelectedProduct(null)}
+                    className="bg-red-500 rounded px-3 py-1 self-start mb-4"
+                  >
+                    <Text className="text-white">Schimbă produsul</Text>
+                  </TouchableOpacity>
+
+                  <TextInput
+                    placeholder="Cantitate"
+                    value={quantity}
+                    onChangeText={setQuantity}
+                    keyboardType="numeric"
+                    className="border border-gray-300 rounded-md px-4 py-2 mb-4"
+                  />
+
+                  <TouchableOpacity
+                    onPress={handleAddStock}
+                    className="bg-green-600 rounded-lg py-3 px-6"
+                  >
+                    <Text className="text-white text-center text-lg font-semibold">
+                      Adaugă stoc
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </>
+        }
+        contentContainerStyle={{ paddingBottom: 32 }}
+      />
     </KeyboardAvoidingView>
   );
 }

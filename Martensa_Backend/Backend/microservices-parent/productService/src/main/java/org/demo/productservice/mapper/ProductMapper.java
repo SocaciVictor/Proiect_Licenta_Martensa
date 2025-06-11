@@ -18,7 +18,23 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "price", expression = "java(product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice())")
+    @Mapping(target = "activePromotionDiscount", expression = "java(getActivePromotionDiscount(product))")
     ProductResponse toProductResponse(Product product);
+
+    default Integer getActivePromotionDiscount(Product product) {
+        return product.getPromotions().stream()
+                .filter(promo -> isPromotionActive(promo))
+                .map(promo -> promo.getDiscountPercentage())
+                .max(Integer::compareTo)
+                .orElse(null);
+    }
+
+    default boolean isPromotionActive(org.demo.productservice.model.Promotion promo) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        return (promo.getStartDate() == null || !promo.getStartDate().isAfter(today)) &&
+                (promo.getEndDate() == null || !promo.getEndDate().isBefore(today));
+    }
+
 
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "name", source = "product.name")

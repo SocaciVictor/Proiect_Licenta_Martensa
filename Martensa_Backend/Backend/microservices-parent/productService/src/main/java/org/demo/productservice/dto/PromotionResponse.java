@@ -5,13 +5,14 @@ import org.demo.productservice.model.enums.PromotionType;
 import java.time.LocalDate;
 import java.util.List;
 
-public record PromotionRequest(
+public record PromotionResponse(
+        Long id,
         String title,
         String description,
-        int discountPercentage,
         LocalDate startDate,
         LocalDate endDate,
-        PromotionType promotionType,
+        int discountPercentage,
         List<Long> productIds,
-        List<Long> userIds
-) {}
+        PromotionType promotionType
+) {
+}

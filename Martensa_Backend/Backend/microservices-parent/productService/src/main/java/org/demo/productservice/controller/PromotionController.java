@@ -39,5 +39,17 @@ public class PromotionController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping
+    public ResponseEntity<List<PromotionDto>> getAllPromotions() {
+        return ResponseEntity.ok(promotionService.getAllPromotions());
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PromotionDto>> getPromotionsForUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(promotionService.getPromotionsForUser(userId));
+    }
+
+
+
 
 }

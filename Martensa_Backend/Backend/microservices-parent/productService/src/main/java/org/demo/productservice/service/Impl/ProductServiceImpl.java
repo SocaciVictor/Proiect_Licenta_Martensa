@@ -122,11 +122,13 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @Transactional
     public List<ProductResponse> getAllProducts() {
         return productMapper.toProductResponseList(productRepository.findAll());
     }
 
     @Override
+    @Transactional
     public void updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -141,6 +143,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -149,6 +152,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public List<ProductResponse> getProductsByCategory(Long id) {
         return productMapper.toProductResponseList(productRepository.findAllByCategoryId(id));
     }

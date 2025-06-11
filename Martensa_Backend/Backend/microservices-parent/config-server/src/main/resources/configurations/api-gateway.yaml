@@ -156,12 +156,25 @@ spring:
           filters:
             - name: Authentication
 
+        - id: payment-service-all
+          uri: lb://payment-service
+          predicates:
+            - Path=/payments/all
+          filters:
+            - name: Authentication
+              args:
+                requiredRoles:
+                  - ROLE_ADMIN
+                securedMethods:
+                  - GET
+
         - id: payment-service
           uri: lb://payment-service
           predicates:
             - Path=/payments/**
           filters:
             - name: Authentication
+
 
         - id: stripe-endpoints
           uri: lb://payment-service
