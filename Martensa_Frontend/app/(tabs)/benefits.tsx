@@ -1,9 +1,12 @@
-import BenefitProductCard from "@/modules/benefits/components/BenefitProductCard";
+import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
+import BenefitPromotionCard from "@/modules/benefits/components/BenefitProductCard";
 import { useBenefits } from "@/modules/benefits/hooks/useBenefits";
 import { ScrollView, Text, View } from "react-native";
 
 export default function BenefitsScreen() {
   const { promotions, loading, error } = useBenefits();
+  const profile = useUserProfile();
+  const points = profile?.loyaltyCard?.points ?? 0;
 
   return (
     <ScrollView className="flex-1 bg-white px-4 py-4">
@@ -12,7 +15,7 @@ export default function BenefitsScreen() {
         <Text className="text-white text-lg font-semibold mb-1">
           🎁 Punctele tale de fidelitate
         </Text>
-        <Text className="text-3xl text-white font-bold">320 puncte</Text>
+        <Text className="text-3xl text-white font-bold">{points} puncte</Text>
       </View>
 
       {/* PROMOTII */}
@@ -28,22 +31,10 @@ export default function BenefitsScreen() {
         </Text>
       )}
 
-      <View className="flex-row flex-wrap justify-between">
-        {promotions.map((promotion) =>
-          promotion.productIds.map((productId) => (
-            <BenefitProductCard
-              key={`${promotion.id}-${productId}`}
-              product={{
-                id: productId,
-                name: promotion.title,
-                price: 20.0, // de înlocuit cu prețul real când vei aduce datele complete
-                discountPrice: 15.0, // idem
-                imageUrl:
-                  "https://cdn.iconscout.com/icon/free/png-256/shopping-cart-452-1142372.png", // idem
-              }}
-            />
-          ))
-        )}
+      <View className="flex-col space-y-3">
+        {promotions.map((promotion) => (
+          <BenefitPromotionCard key={promotion.id} promotion={promotion} />
+        ))}
       </View>
     </ScrollView>
   );

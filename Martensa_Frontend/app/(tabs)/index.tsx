@@ -1,6 +1,5 @@
 import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
 import SearchOverlay from "@/modules/products/components/SearchOverlay";
-import { Ionicons } from "@expo/vector-icons";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HomeScreen() {
@@ -50,7 +49,7 @@ export default function HomeScreen() {
                 </View>
 
                 {/* Card: Reduceri */}
-                <View className="bg-[#fff5f5] border border-[#ffcaca] rounded-xl p-4 w-64">
+                <View className="bg-[#fff5f5] border border-[#ffcaca] rounded-xl p-4 w-64 ml-2">
                   <Text className="text-[#cc0000] font-bold text-base mb-1">
                     Reduceri active
                   </Text>
@@ -63,7 +62,7 @@ export default function HomeScreen() {
                 </View>
 
                 {/* Card: Oferte personalizate */}
-                <View className="bg-[#f0f7ff] border border-[#cce1ff] rounded-xl p-4 w-64">
+                <View className="bg-[#f0f7ff] border border-[#cce1ff] rounded-xl p-4 w-64 ml-2">
                   <Text className="text-[#0077cc] font-bold text-base mb-1">
                     Oferte personalizate
                   </Text>
@@ -76,19 +75,6 @@ export default function HomeScreen() {
                 </View>
               </View>
             </ScrollView>
-
-            {/* ⏱️ Interval livrare */}
-            <View className="bg-gray-50 rounded-lg p-3 flex-row items-center justify-between">
-              <View className="flex-1 pr-2">
-                <Text className="text-black font-semibold">
-                  Selectează intervalul
-                </Text>
-                <Text className="text-gray-600 text-sm">
-                  Când vrei să primești produsele?
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </View>
           </>
         )}
       </ScrollView>

@@ -190,4 +190,5 @@ export type PromotionDto = {
   endDate: string;
   promotionType: PromotionType;
   productIds: number[];
+  userIds: number[];
 };

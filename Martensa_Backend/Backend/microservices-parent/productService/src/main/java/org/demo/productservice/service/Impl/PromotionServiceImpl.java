@@ -3,6 +3,7 @@ package org.demo.productservice.service.Impl;
 import jakarta.transaction.Transactional;
 import org.demo.productservice.dto.PromotionDto;
 import org.demo.productservice.dto.PromotionRequest;
+import org.demo.productservice.dto.UserDto;
 import org.demo.productservice.exception.ProductNotFoundException;
 import org.demo.productservice.exception.PromotionNotFoundException;
 import org.demo.productservice.feign.UserClient;
@@ -111,6 +112,26 @@ public class PromotionServiceImpl implements PromotionService {
                         .toList()
         );
     }
+
+    @Override
+    @Transactional
+    public void activatePromotionForUser(Long promotionId, Long userId) {
+        Promotion promotion = promotionRepository.findById(promotionId)
+                .orElseThrow(() -> new PromotionNotFoundException("Promoția cu ID " + promotionId + " nu există."));
+
+
+        UserDto user = userClient.getUserById(userId);
+
+        if (promotion.getPromotionType() != PromotionType.CUSTOM) {
+            throw new IllegalArgumentException("Promoția nu poate fi activată manual (nu este de tip CUSTOM).");
+        }
+
+        if (!promotion.getUserIds().contains(userId)) {
+            promotion.getUserIds().add(userId);
+            promotionRepository.save(promotion);
+        }
+    }
+
 
 
 }

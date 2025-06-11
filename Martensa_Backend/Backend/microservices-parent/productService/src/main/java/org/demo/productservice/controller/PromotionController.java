@@ -49,6 +49,14 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.getPromotionsForUser(userId));
     }
 
+    @PostMapping("/{promotionId}/activate")
+    public ResponseEntity<Void> activatePromotionForUser(
+            @PathVariable Long promotionId,
+            @RequestParam Long userId) {
+        promotionService.activatePromotionForUser(promotionId, userId);
+        return ResponseEntity.ok().build();
+    }
+
 
 
 
