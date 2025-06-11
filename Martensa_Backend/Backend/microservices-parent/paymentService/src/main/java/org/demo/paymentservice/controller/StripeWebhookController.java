@@ -14,14 +14,17 @@ import org.demo.paymentservice.config.PaymentRabbitProperties;
 import org.demo.paymentservice.config.StripeProperties;
 import org.demo.paymentservice.dto.PaymentCompletedEvent;
 import org.demo.paymentservice.dto.ProductQuantity;
+import org.demo.paymentservice.model.Payment;
 import org.demo.paymentservice.model.ProcessedWebhook;
 import org.demo.paymentservice.model.enums.PaymentStatus;
+import org.demo.paymentservice.repository.PaymentRepository;
 import org.demo.paymentservice.repository.ProcessedWebhookRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ public class StripeWebhookController {
     private final PaymentRabbitProperties rabbitProps;
     private final StripeProperties stripeProperties;
     private final ProcessedWebhookRepository processedWebhookRepository;
+    private final PaymentRepository paymentRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping
@@ -45,14 +49,12 @@ public class StripeWebhookController {
         Event event = null;
         boolean verified = false;
 
-        // Verificare semnătură cu toate secretele din config
         for (String secret : stripeProperties.getWebhookSecrets()) {
             try {
                 event = Webhook.constructEvent(payload, sigHeader, secret);
                 verified = true;
                 break;
             } catch (SignatureVerificationException e) {
-                // Ignor, încerc cu următorul secret
             }
         }
 
@@ -110,6 +112,20 @@ public class StripeWebhookController {
                                 PaymentStatus.SUCCESS
                         )
                 );
+
+                Payment payment = Payment.builder()
+                        .orderId(orderId)
+                        .userId(userId)
+                        .amount(amount)
+                        .status(PaymentStatus.SUCCESS)
+                        .method("CARD")
+                        .paymentDate(LocalDate.now())
+                        .build();
+
+                paymentRepository.save(payment);
+
+                log.info("💰 Saved Payment: orderId={}, userId={}, amount={}, paymentIntentId={}",
+                        orderId, userId, amount, paymentIntentId);
 
                 log.info("✅ Emitted PaymentCompletedEvent SUCCESS for orderId={} userId={} amount={} products={}",
                         orderId, userId, amount, products);
