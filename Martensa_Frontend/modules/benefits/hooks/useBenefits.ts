@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export const useBenefits = () => {
   const user = useAuthStore((state) => state.user);
-  const [promotions, setPromotions] = useState<PromotionDto[]>([]); // array gol
+  const [promotions, setPromotions] = useState<PromotionDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const refreshVersion = useRefreshStore((state) => state.refreshVersion);

@@ -22,7 +22,7 @@ export default function OrdersScreen() {
       fetchOrdersByUserId(userId);
       console.log("Fetching orders for user ID:", userId);
     }
-  }, [userId, refreshVersion]);
+  }, [userId]);
 
   return (
     <View className="flex-1 bg-white px-4 pt-4">

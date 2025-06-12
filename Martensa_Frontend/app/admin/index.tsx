@@ -9,14 +9,16 @@ export default function AdminDashboard() {
     | "/admin/products"
     | "/admin/orders"
     | "/admin/payments"
-    | "/admin/stores"; // 🚩 am adaugat Stores
+    | "/admin/stores"
+    | "/admin/promotions";
 
   const sections: { title: string; route: AdminRoute }[] = [
     { title: "Gestiune Utilizatori", route: "/admin/users" },
     { title: "Gestiune Produse", route: "/admin/products" },
     { title: "Vizualizare Comenzi", route: "/admin/orders" },
     { title: "Vizualizare Plăți", route: "/admin/payments" },
-    { title: "Gestiune Magazine", route: "/admin/stores" }, // 🚩 adaugat aici
+    { title: "Gestiune Magazine", route: "/admin/stores" },
+    { title: "Gestiune Promoții", route: "/admin/promotions" },
   ];
 
   return (

@@ -13,7 +13,7 @@ export function useAvailableCustomPromotions(userId?: number | null) {
 
   useEffect(() => {
     const fetchAvailablePromotions = async () => {
-      if (!userId) return; // nu apelăm dacă nu avem userId
+      if (!userId) return;
 
       setLoading(true);
       setError(null);
@@ -23,6 +23,7 @@ export function useAvailableCustomPromotions(userId?: number | null) {
           `/promotions/user/${userId}/available-custom`
         );
         setAvailablePromotions(response.data);
+        console.log("Available promotions:", response.data);
       } catch (err) {
         console.error("Eroare la fetch available promotions:", err);
         setError("Eroare la încărcarea promoțiilor disponibile.");

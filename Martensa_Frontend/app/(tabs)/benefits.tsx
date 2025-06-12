@@ -11,17 +11,25 @@ export default function BenefitsScreen() {
   const profile = useUserProfile();
   const points = profile?.loyaltyCard?.points ?? 0;
   const authenticated = useAuthStore((state) => state.authenticated);
-
   const userId = useAuthStore((state) => state.userId);
+
   const {
     availablePromotions,
     loading: loadingAvailable,
     error: errorAvailable,
   } = useAvailableCustomPromotions(userId);
 
-  const allPromotions = promotions.filter(
-    (promotion) => promotion.promotionType === "ALL"
-  );
+  const activatedPromotions = promotions.filter((promotion) => {
+    if (promotion.promotionType === "ALL") return true;
+    if (
+      promotion.promotionType === "CUSTOM" &&
+      promotion.userIds &&
+      promotion.userIds.includes(userId ?? -1)
+    ) {
+      return true;
+    }
+    return false;
+  });
 
   if (!authenticated) {
     return (
@@ -61,25 +69,25 @@ export default function BenefitsScreen() {
         <Text className="text-3xl text-white font-bold">{points} puncte</Text>
       </View>
 
-      <Text className="text-xl font-bold mb-2">Promoții pentru tine</Text>
+      {/* Secțiunea: Promoții active */}
+      <Text className="text-xl font-bold mb-2">Promoțiile tale active</Text>
 
       {loading && <Text>Se încarcă promoțiile...</Text>}
 
       {error && <Text className="text-red-600">{error}</Text>}
 
-      {allPromotions.length === 0 && !loading && !error && (
-        <Text className="text-gray-500">
-          Momentan nu există promoții active.
-        </Text>
+      {activatedPromotions.length === 0 && !loading && !error && (
+        <Text className="text-gray-500">Momentan nu ai promoții active.</Text>
       )}
 
-      <View className="flex-col space-y-3">
-        {allPromotions.map((promotion) => (
+      <View className="flex-col space-y-3 mb-6">
+        {activatedPromotions.map((promotion) => (
           <BenefitPromotionCard key={promotion.id} promotion={promotion} />
         ))}
       </View>
 
-      <Text className="text-xl font-bold mt-6 mb-2">
+      {/* Secțiunea: Promoții disponibile pentru activare */}
+      <Text className="text-xl font-bold mb-2">
         Promoții pe care le poți activa
       </Text>
 

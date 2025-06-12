@@ -1,6 +1,7 @@
 package org.demo.productservice.service.Impl;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.demo.productservice.dto.PromotionDto;
 import org.demo.productservice.dto.PromotionRequest;
 import org.demo.productservice.dto.UserDto;
@@ -17,8 +18,11 @@ import org.demo.productservice.service.PromotionService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+@Slf4j
 @Service
 public class PromotionServiceImpl implements PromotionService {
     private final PromotionRepository promotionRepository;
@@ -34,25 +38,8 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
+    @Transactional
     public void createPromotion(PromotionRequest request) {
-        List<Product> products = productRepository.findAllById(request.productIds());
-
-        if (products.size() != request.productIds().size()) {
-            throw new ProductNotFoundException("Unul sau mai multe produse nu au fost găsite.");
-        }
-
-        List<Long> validUserIds = List.of();
-        if (request.promotionType() == PromotionType.CUSTOM && request.userIds() != null) {
-            validUserIds = request.userIds().stream().map(userId -> {
-                try {
-                    userClient.getUserById(userId);
-                    return userId;
-                } catch (Exception e) {
-                    throw new RuntimeException("User-ul cu id " + userId + " nu există!");
-                }
-            }).toList();
-        }
-
         Promotion promotion = Promotion.builder()
                 .title(request.title())
                 .description(request.description())
@@ -60,9 +47,19 @@ public class PromotionServiceImpl implements PromotionService {
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .promotionType(request.promotionType())
-                .products(products)
-                .userIds(validUserIds)
+                .products(productRepository.findAllById(request.productIds()))
                 .build();
+
+        // SAFE pentru userIds:
+        if (request.userIds() == null || request.userIds().isEmpty()) {
+            promotion.setUserIds(Collections.emptyList());
+        } else {
+            // eliminăm eventualele null-uri:
+            List<Long> safeUserIds = request.userIds().stream()
+                    .filter(Objects::nonNull)
+                    .toList();
+            promotion.setUserIds(safeUserIds);
+        }
 
         promotionRepository.save(promotion);
     }
@@ -138,13 +135,26 @@ public class PromotionServiceImpl implements PromotionService {
     public List<PromotionDto> getAvailableCustomPromotionsForUser(Long userId) {
         List<Promotion> promotions = promotionRepository.findAll();
 
-        return promotionMapper.toPromotionDtoList(
+       return promotionMapper.toPromotionDtoList(
                 promotions.stream()
                         .filter(promo -> promo.getPromotionType() == PromotionType.CUSTOM)
-                        .filter(promo -> promo.getUserIds() == null || !promo.getUserIds().contains(userId))
-                        .filter(promo -> !promo.getStartDate().isAfter(LocalDate.now()) &&
-                                !promo.getEndDate().isBefore(LocalDate.now()))
+                        .filter(promo -> {
+                            List<Long> userIds = promo.getUserIds();
+
+                            if (userIds == null || userIds.isEmpty()) {
+                                return true;
+                            }
+
+                            return userIds.stream()
+                                    .filter(id -> id != null)
+                                    .noneMatch(id -> id.equals(userId));
+                        })
+                        .filter(promo ->
+                                        !promo.getEndDate().isBefore(LocalDate.now())
+                        )
                         .toList()
         );
     }
+
+
 }
