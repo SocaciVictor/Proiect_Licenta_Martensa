@@ -6,6 +6,7 @@ import com.martensa.userService.dto.request.UserUpdateRequest;
 import com.martensa.userService.dto.response.LoyaltyCardResponse;
 import com.martensa.userService.dto.response.UserProfileResponse;
 import com.martensa.userService.dto.response.UserSummaryResponse;
+import com.martensa.userService.exception.InsufficientLoyaltyPointsException;
 import com.martensa.userService.exception.UserAlreadyExistsException;
 import com.martensa.userService.exception.UsernameNotFoundException;
 import com.martensa.userService.mapper.UserMapper;
@@ -129,6 +130,19 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserProfile(user);
     }
 
+    @Override
+    public void deductLoyaltyPoints(Long userId, int points) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User with id " + userId + " not found"));
+
+        LoyaltyCard card = user.getLoyaltyCard();
+        if (card.getPoints() < points) {
+            throw new InsufficientLoyaltyPointsException("User does not have enough loyalty points.");
+        }
+
+        card.setPoints(card.getPoints() - points);
+        loyaltyCardRepository.save(card);
+    }
 
 
 }

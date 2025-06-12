@@ -17,4 +17,6 @@ public interface PromotionService {
     List<PromotionDto> getPromotionsForUser(Long userId);
 
     void activatePromotionForUser(Long promotionId, Long userId);
+
+    List<PromotionDto> getAvailableCustomPromotionsForUser(Long userId);
 }

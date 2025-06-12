@@ -57,6 +57,10 @@ public class PromotionController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/user/{userId}/available-custom")
+    public ResponseEntity<List<PromotionDto>> getAvailableCustomPromotionsForUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(promotionService.getAvailableCustomPromotionsForUser(userId));
+    }
 
 
 

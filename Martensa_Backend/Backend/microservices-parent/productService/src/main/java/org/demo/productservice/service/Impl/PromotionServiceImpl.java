@@ -7,7 +7,6 @@ import org.demo.productservice.dto.UserDto;
 import org.demo.productservice.exception.ProductNotFoundException;
 import org.demo.productservice.exception.PromotionNotFoundException;
 import org.demo.productservice.feign.UserClient;
-import org.demo.productservice.mapper.ProductMapper;
 import org.demo.productservice.mapper.PromotionMapper;
 import org.demo.productservice.model.Product;
 import org.demo.productservice.model.Promotion;
@@ -42,7 +41,6 @@ public class PromotionServiceImpl implements PromotionService {
             throw new ProductNotFoundException("Unul sau mai multe produse nu au fost găsite.");
         }
 
-        // ✅ dacă e CUSTOM, validăm userIds
         List<Long> validUserIds = List.of();
         if (request.promotionType() == PromotionType.CUSTOM && request.userIds() != null) {
             validUserIds = request.userIds().stream().map(userId -> {
@@ -119,19 +117,34 @@ public class PromotionServiceImpl implements PromotionService {
         Promotion promotion = promotionRepository.findById(promotionId)
                 .orElseThrow(() -> new PromotionNotFoundException("Promoția cu ID " + promotionId + " nu există."));
 
-
         UserDto user = userClient.getUserById(userId);
 
         if (promotion.getPromotionType() != PromotionType.CUSTOM) {
             throw new IllegalArgumentException("Promoția nu poate fi activată manual (nu este de tip CUSTOM).");
         }
 
-        if (!promotion.getUserIds().contains(userId)) {
-            promotion.getUserIds().add(userId);
-            promotionRepository.save(promotion);
+        if (promotion.getUserIds().contains(userId)) {
+            throw new IllegalArgumentException("Promoția a fost deja activată de acest utilizator.");
         }
+
+        userClient.deductLoyaltyPoints(userId, 1000);
+
+        promotion.getUserIds().add(userId);
+        promotionRepository.save(promotion);
     }
 
+    @Override
+    @Transactional
+    public List<PromotionDto> getAvailableCustomPromotionsForUser(Long userId) {
+        List<Promotion> promotions = promotionRepository.findAll();
 
-
+        return promotionMapper.toPromotionDtoList(
+                promotions.stream()
+                        .filter(promo -> promo.getPromotionType() == PromotionType.CUSTOM)
+                        .filter(promo -> promo.getUserIds() == null || !promo.getUserIds().contains(userId))
+                        .filter(promo -> !promo.getStartDate().isAfter(LocalDate.now()) &&
+                                !promo.getEndDate().isBefore(LocalDate.now()))
+                        .toList()
+        );
+    }
 }

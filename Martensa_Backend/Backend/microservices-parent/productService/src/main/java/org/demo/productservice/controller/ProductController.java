@@ -57,5 +57,13 @@ public class ProductController {
         return productService.getProductsByCategory(id);
     }
 
+    @GetMapping("/{id}/personalized")
+    public ResponseEntity<ProductDetailsResponse> getProductByIdPersonalized(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId
+    ) {
+        return ResponseEntity.ok(productService.getProductByIdPersonalized(id, userId));
+    }
+
 
 }

@@ -40,6 +40,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(InsufficientLoyaltyPointsException.class)
+    public ResponseEntity<String> handleInsufficientLoyaltyPoints(InsufficientLoyaltyPointsException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
 
 }
 

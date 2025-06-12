@@ -1,7 +1,9 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import * as Linking from "expo-linking";
 import { createOrder, createStripeCheckout } from "../api/paymentApi";
 
 export const useStripeCheckout = () => {
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
   const checkout = async (
     orderPayload: any,
     checkoutPayloadBuilder: (orderId: number) => any

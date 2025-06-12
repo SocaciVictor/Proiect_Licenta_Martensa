@@ -1,6 +1,7 @@
 import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import BenefitPromotionCard from "@/modules/benefits/components/BenefitProductCard";
+import { useAvailableCustomPromotions } from "@/modules/benefits/hooks/useAvailableCustomPromotions";
 import { useBenefits } from "@/modules/benefits/hooks/useBenefits";
 import { router } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -11,10 +12,20 @@ export default function BenefitsScreen() {
   const points = profile?.loyaltyCard?.points ?? 0;
   const authenticated = useAuthStore((state) => state.authenticated);
 
+  const userId = useAuthStore((state) => state.userId);
+  const {
+    availablePromotions,
+    loading: loadingAvailable,
+    error: errorAvailable,
+  } = useAvailableCustomPromotions(userId);
+
+  const allPromotions = promotions.filter(
+    (promotion) => promotion.promotionType === "ALL"
+  );
+
   if (!authenticated) {
     return (
       <ScrollView className="flex-1 bg-white px-4 py-4">
-        {/* CARD DE FIDELITATE NEAUTENTIFICAT */}
         <View className="bg-[#f3f3f3] rounded-xl p-4 mb-4 items-center justify-center">
           <Image
             source={require("../../assets/images/card-icon.png")}
@@ -43,7 +54,6 @@ export default function BenefitsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white px-4 py-4">
-      {/* CARD CU PUNCTELE */}
       <View className="bg-[#28a745] rounded-xl p-4 mb-4">
         <Text className="text-white text-lg font-semibold mb-1">
           🎁 Punctele tale de fidelitate
@@ -51,21 +61,42 @@ export default function BenefitsScreen() {
         <Text className="text-3xl text-white font-bold">{points} puncte</Text>
       </View>
 
-      {/* PROMOTII */}
       <Text className="text-xl font-bold mb-2">Promoții pentru tine</Text>
 
       {loading && <Text>Se încarcă promoțiile...</Text>}
 
       {error && <Text className="text-red-600">{error}</Text>}
 
-      {promotions.length === 0 && !loading && !error && (
+      {allPromotions.length === 0 && !loading && !error && (
         <Text className="text-gray-500">
           Momentan nu există promoții active.
         </Text>
       )}
 
       <View className="flex-col space-y-3">
-        {promotions.map((promotion) => (
+        {allPromotions.map((promotion) => (
+          <BenefitPromotionCard key={promotion.id} promotion={promotion} />
+        ))}
+      </View>
+
+      <Text className="text-xl font-bold mt-6 mb-2">
+        Promoții pe care le poți activa
+      </Text>
+
+      {loadingAvailable && <Text>Se încarcă promoțiile disponibile...</Text>}
+
+      {errorAvailable && <Text className="text-red-600">{errorAvailable}</Text>}
+
+      {availablePromotions.length === 0 &&
+        !loadingAvailable &&
+        !errorAvailable && (
+          <Text className="text-gray-500">
+            Momentan nu există promoții disponibile pentru activare.
+          </Text>
+        )}
+
+      <View className="flex-col space-y-3">
+        {availablePromotions.map((promotion) => (
           <BenefitPromotionCard key={promotion.id} promotion={promotion} />
         ))}
       </View>

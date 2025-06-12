@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { ProductResponse } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
 import { useEffect, useState } from "react";
@@ -7,6 +8,7 @@ export const useProductsByCategory = (
 ) => {
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -21,7 +23,7 @@ export const useProductsByCategory = (
       }
     };
     fetchProducts();
-  }, [categoryId]);
+  }, [categoryId, refreshVersion]);
 
   return { products, loading };
 };

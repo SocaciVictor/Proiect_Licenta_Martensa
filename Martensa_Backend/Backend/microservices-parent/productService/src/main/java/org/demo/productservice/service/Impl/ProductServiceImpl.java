@@ -11,6 +11,7 @@ import org.demo.productservice.mapper.ProductMapper;
 import org.demo.productservice.mapper.PromotionMapper;
 import org.demo.productservice.model.Category;
 import org.demo.productservice.model.Product;
+import org.demo.productservice.model.enums.PromotionType;
 import org.demo.productservice.repository.CategoryRepository;
 import org.demo.productservice.repository.ProductRepository;
 import org.demo.productservice.service.ProductService;
@@ -70,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
 
                         product.setDiscountPrice(product.getPrice().subtract(discount));
                     } else {
-                        product.setDiscountPrice(null); // nu mai e activ
+                        product.setDiscountPrice(null);
                     }
 
                     return productMapper.toProductDetails(product, promotionDtos);
@@ -156,4 +157,36 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponse> getProductsByCategory(Long id) {
         return productMapper.toProductResponseList(productRepository.findAllByCategoryId(id));
     }
+
+    @Override
+    @Transactional
+    public ProductDetailsResponse getProductByIdPersonalized(Long id, Long userId) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    List<PromotionDto> promotionDtos = product.getPromotions().stream()
+                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
+                                    !p.getEndDate().isBefore(LocalDate.now()) &&
+                                    (p.getPromotionType() == PromotionType.ALL ||
+                                            (p.getPromotionType() == PromotionType.CUSTOM &&
+                                                    p.getUserIds() != null && p.getUserIds().contains(userId))))
+                            .map(promotionMapper::toDto)
+                            .toList();
+
+                    if (!promotionDtos.isEmpty()) {
+                        PromotionDto promo = promotionDtos.get(0);
+                        BigDecimal discount = product.getPrice()
+                                .multiply(BigDecimal.valueOf(promo.discountPercentage()))
+                                .divide(BigDecimal.valueOf(100));
+
+                        product.setDiscountPrice(product.getPrice().subtract(discount));
+                    } else {
+                        product.setDiscountPrice(null);
+                    }
+
+                    return productMapper.toProductDetails(product, promotionDtos);
+                })
+                .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+
 }

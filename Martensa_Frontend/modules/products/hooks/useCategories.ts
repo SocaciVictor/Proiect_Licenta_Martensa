@@ -1,4 +1,5 @@
 // modules/products/hooks/useCategories.ts
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import apiClient from "@/services/apiClient";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ export interface CategoryResponse {
 export function useCategories() {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -24,7 +26,7 @@ export function useCategories() {
     };
 
     fetchCategories();
-  }, []);
+  }, [refreshVersion]);
 
   return { categories, loading };
 }

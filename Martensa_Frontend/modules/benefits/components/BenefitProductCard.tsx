@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { PromotionDto } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
@@ -10,6 +11,11 @@ type Props = {
 
 export default function BenefitPromotionCard({ promotion }: Props) {
   const user = useAuthStore((state) => state.user);
+  const points = user?.loyaltyCard?.points ?? 0;
+
+  const incrementRefreshVersion = useRefreshStore(
+    (state) => state.incrementRefreshVersion
+  );
   const [activated, setActivated] = useState(
     promotion.userIds?.includes(user?.id ?? -1)
   );
@@ -20,6 +26,8 @@ export default function BenefitPromotionCard({ promotion }: Props) {
         params: { userId: user?.id },
       });
       setActivated(true);
+
+      incrementRefreshVersion();
     } catch (err) {
       console.error("Eroare la activarea promoției:", err);
     }
@@ -38,6 +46,18 @@ export default function BenefitPromotionCard({ promotion }: Props) {
         Reducere: {promotion.discountPercentage}%
       </Text>
 
+      {/* ✅ Doar la CUSTOM afișăm costul și punctele userului */}
+      {promotion.promotionType === "CUSTOM" && (
+        <>
+          <Text className="text-sm font-semibold mb-2 text-[#28a745]">
+            Cost: 1000 puncte
+          </Text>
+          <Text className="text-sm font-semibold mb-2 text-gray-700">
+            Punctele tale: {points} puncte
+          </Text>
+        </>
+      )}
+
       {promotion.promotionType === "ALL" ? (
         <Text className="text-green-600 font-semibold">
           Se aplică tuturor utilizatorilor automat
@@ -46,12 +66,18 @@ export default function BenefitPromotionCard({ promotion }: Props) {
         <Text className="text-green-600 font-semibold">
           Activată pentru tine
         </Text>
+      ) : points < 1000 ? (
+        <Text className="text-red-600 font-semibold">
+          Nu ai suficiente puncte pentru a activa promoția
+        </Text>
       ) : (
         <TouchableOpacity
           className="mt-2 py-2 px-4 bg-[#28a745] rounded items-center"
           onPress={handleActivate}
         >
-          <Text className="text-white font-semibold">Activează promoția</Text>
+          <Text className="text-white font-semibold">
+            Activează promoția (cost: 1000 puncte)
+          </Text>
         </TouchableOpacity>
       )}
     </View>

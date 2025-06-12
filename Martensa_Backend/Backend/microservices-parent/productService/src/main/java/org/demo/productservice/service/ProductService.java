@@ -15,4 +15,6 @@ public interface ProductService {
     void updateProduct(Long id, ProductRequest request);
     void deleteProduct(Long id);
     List<ProductResponse> getProductsByCategory(Long id);
+    ProductDetailsResponse getProductByIdPersonalized(Long id, Long userId);
+
 }

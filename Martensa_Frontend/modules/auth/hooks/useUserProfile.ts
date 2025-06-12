@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { UserProfileResponse } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
@@ -7,6 +8,7 @@ export const useUserProfile = () => {
   const email = useAuthStore((state) => state.email);
   const token = useAuthStore((state) => state.token);
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,7 +25,7 @@ export const useUserProfile = () => {
     };
 
     fetchProfile();
-  }, [email, token]);
+  }, [email, token, refreshVersion]);
 
   return profile;
 };

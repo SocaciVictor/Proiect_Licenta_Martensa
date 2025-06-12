@@ -30,4 +30,5 @@ public interface UserService {
 
     UserProfileResponse getUserById(Long id);
 
+    void deductLoyaltyPoints(Long id, int points);
 }

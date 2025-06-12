@@ -77,5 +77,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @PostMapping("/{id}/loyalty-card/deduct-points")
+    public ResponseEntity<Void> deductLoyaltyPoints(
+            @PathVariable Long id,
+            @RequestParam("points") int points) {
+        userService.deductLoyaltyPoints(id, points);
+        return ResponseEntity.ok().build();
+    }
 
 }

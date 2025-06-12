@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import {
   addToSearchHistory,
   clearSearchHistory,
@@ -13,11 +14,12 @@ export const useProductSearch = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const router = useRouter();
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
 
   useEffect(() => {
     fetchAllProducts();
     loadSearchHistory();
-  }, []);
+  }, [refreshVersion]);
 
   const loadSearchHistory = async () => {
     const history = await getSearchHistory();

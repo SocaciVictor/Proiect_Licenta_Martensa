@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { PromotionDto } from "@/modules/auth/types/auth";
 import { fetchUserPromotions } from "@/modules/benefits/api/api";
@@ -8,6 +9,7 @@ export const useBenefits = () => {
   const [promotions, setPromotions] = useState<PromotionDto[]>([]); // array gol
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion);
 
   useEffect(() => {
     const loadPromotions = async () => {
@@ -28,7 +30,7 @@ export const useBenefits = () => {
     };
 
     loadPromotions();
-  }, [user?.id]);
+  }, [user?.id, refreshVersion]);
 
   return { promotions, loading, error };
 };

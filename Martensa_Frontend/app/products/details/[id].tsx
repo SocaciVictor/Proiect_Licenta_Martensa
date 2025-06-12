@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { ProductDetailsResponse } from "@/modules/auth/types/auth";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import apiClientNoAuth from "@/services/apiClientNoAuth";
@@ -20,12 +21,18 @@ export default function ProductDetailsScreen() {
   const router = useRouter();
   const [product, setProduct] = useState<ProductDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const userId = useAuthStore((state) => state.userId);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const res = await apiClientNoAuth.get<ProductDetailsResponse>(
-          `/products/${id}`
+          `/products/${id}/personalized`,
+          {
+            params: {
+              userId: userId,
+            },
+          }
         );
         setProduct(res.data);
       } catch (err) {
