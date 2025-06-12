@@ -5,6 +5,7 @@ import { OrderResponse } from "../types/orderTypes";
 interface OrderState {
   orders: OrderResponse[];
   fetchOrdersByUserId: (userId: number) => Promise<void>;
+  clearOrders: () => void; // 👈 adăugat
   loading: boolean;
 }
 
@@ -25,4 +26,6 @@ export const useOrderStore = create<OrderState>((set) => ({
       set({ loading: false });
     }
   },
+
+  clearOrders: () => set({ orders: [] }), // 👈 adăugat
 }));

@@ -1,4 +1,5 @@
 import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
+import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useUserPromotions } from "@/modules/benefits/hooks/useUserPromotions";
 import ProductPromoCard from "@/modules/products/components/ProductPromoCard";
 import SearchOverlay from "@/modules/products/components/SearchOverlay";
@@ -6,6 +7,7 @@ import { useProductsAll } from "@/modules/products/hooks/useProductsAll";
 import { ScrollView, Text, View } from "react-native";
 
 export default function HomeScreen() {
+  const authenticated = useAuthStore((state) => state.authenticated);
   const profile = useUserProfile();
   const points = profile?.loyaltyCard?.points ?? 0;
   const name = profile?.firstName ?? "Utilizator";
@@ -30,10 +32,19 @@ export default function HomeScreen() {
         {/* 🔍 Search Overlay vizibil mereu */}
         <SearchOverlay />
 
-        {/* Restul vizibil DOAR dacă e autentificat */}
-        {profile && (
+        {/* ➡️ verificare autentificare */}
+        {!authenticated ? (
+          <Text className="text-center text-gray-500 mt-6">
+            Conectează-te pentru a vedea promoțiile tale și produsele
+            personalizate.
+          </Text>
+        ) : !profile ? (
+          <Text className="text-center text-gray-500 mt-6">
+            Se încarcă profilul...
+          </Text>
+        ) : (
           <>
-            {/* 👋 Salut {nume} */}
+            {/* 👋 Salut {name} */}
             <Text className="text-xl font-bold text-black mb-4">
               Salut, {name}!
             </Text>

@@ -1,9 +1,11 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import * as authService from "@/modules/auth/services/authService";
 import {
   LoginRequest,
   RegisterRequest,
   UserProfileResponse,
 } from "@/modules/auth/types/auth";
+import { useOrderStore } from "@/modules/orders/store/useOrderStore";
 import apiClient from "@/services/apiClient";
 import { decodeJwt } from "@/utils/decodeJwt";
 import * as SecureStore from "expo-secure-store";
@@ -89,6 +91,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       // 3️⃣ initAuth → face validare + setează email, user, userId etc.
       await useAuthStore.getState().initAuth();
+      useRefreshStore.getState().incrementRefreshVersion();
 
       return response;
     } catch (e: any) {
@@ -108,6 +111,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ token: response.token, authenticated: true });
 
       await useAuthStore.getState().initAuth();
+
+      useRefreshStore.getState().incrementRefreshVersion();
 
       return response;
     } catch (e: any) {
@@ -131,8 +136,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: null,
       });
 
+      useOrderStore.getState().clearOrders();
       // Fac din nou initAuth pentru a forța refresh pe componente
       await useAuthStore.getState().initAuth();
+      useRefreshStore.getState().incrementRefreshVersion();
     } catch (err) {
       console.error("Eroare la logout:", err);
     }

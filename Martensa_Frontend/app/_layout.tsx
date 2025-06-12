@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import * as Linking from "expo-linking";
@@ -12,26 +13,17 @@ export default function RootLayout() {
   const authenticated = useAuthStore((state) => state.authenticated); // adaugam observare pe authenticated
   const fetchCart = useCartStore((state) => state.fetchCart);
   const clearCart = useCartStore((state) => state.clearCart);
+  const incrementRefreshVersion = useRefreshStore(
+    (state) => state.incrementRefreshVersion
+  );
 
-  // INIT auth + cart on app start
-  useEffect(() => {
-    const init = async () => {
-      await initAuth();
-      if (useAuthStore.getState().authenticated) {
-        fetchCart();
-      }
-    };
-
-    init();
-  }, []);
-
-  // 🔥 Adaugam useEffect reactiv pe authenticated
   useEffect(() => {
     const refresh = async () => {
       await initAuth();
       if (useAuthStore.getState().authenticated) {
         fetchCart();
       }
+      incrementRefreshVersion();
     };
 
     refresh();

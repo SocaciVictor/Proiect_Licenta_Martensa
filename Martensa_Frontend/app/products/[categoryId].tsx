@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore"; // ⬅️ adăugat
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import ProductCardAdvanced from "@/modules/products/components/ProductCartAdvanced";
 import SearchOverlay from "@/modules/products/components/SearchOverlay";
@@ -13,9 +14,11 @@ export default function ProductsByCategoryScreen() {
   const router = useRouter();
   const { products, loading } = useProductsByCategory(categoryId);
   const fetchCart = useCartStore((state) => state.fetchCart);
+  const refreshVersion = useRefreshStore((state) => state.refreshVersion); // ⬅️ adăugat
+
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [refreshVersion]); // ⬅️ adăugat refreshVersion
 
   return (
     <View className="flex-1 bg-white ">

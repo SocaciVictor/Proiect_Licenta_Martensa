@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import * as authService from "@/modules/auth/services/authService";
 import * as SecureStore from "expo-secure-store";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -21,6 +22,10 @@ const AuthContext = createContext<AuthProps>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: any) => {
+  const incrementRefreshVersion = useRefreshStore(
+    (state) => state.incrementRefreshVersion
+  );
+
   const [authState, setAuthState] = useState<{
     token: string | null;
     authenticated: boolean | null;
@@ -47,6 +52,7 @@ export const AuthProvider = ({ children }: any) => {
       const response = await authService.login(data);
       await SecureStore.setItemAsync(TOKEN_KEY, response.token);
       setAuthState({ token: response.token, authenticated: true });
+      incrementRefreshVersion();
       return response;
     } catch (e: any) {
       return {
@@ -61,6 +67,7 @@ export const AuthProvider = ({ children }: any) => {
       const response = await authService.register(data);
       await SecureStore.setItemAsync(TOKEN_KEY, response.token);
       setAuthState({ token: response.token, authenticated: true });
+      incrementRefreshVersion();
       return response;
     } catch (e: any) {
       return {
@@ -73,6 +80,7 @@ export const AuthProvider = ({ children }: any) => {
   const logout = async () => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     setAuthState({ token: null, authenticated: false });
+    incrementRefreshVersion();
   };
 
   return (
