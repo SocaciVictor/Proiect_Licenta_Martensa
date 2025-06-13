@@ -58,8 +58,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .map(product -> {
                     List<PromotionDto> promotionDtos = product.getPromotions().stream()
-                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
-                                    !p.getEndDate().isBefore(LocalDate.now()))
+                            .filter(p -> !p.getEndDate().isBefore(LocalDate.now()))
                             .map(promotionMapper::toDto)
                             .toList();
 
@@ -88,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .map(product -> {
                     List<PromotionDto> promotionDtos = product.getPromotions().stream()
-                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
+                            .filter(p ->
                                     !p.getEndDate().isBefore(LocalDate.now()))
                             .map(promotionMapper::toDto)
                             .toList();
@@ -164,7 +163,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .map(product -> {
                     List<PromotionDto> promotionDtos = product.getPromotions().stream()
-                            .filter(p -> !p.getStartDate().isAfter(LocalDate.now()) &&
+                            .filter(p ->
                                     !p.getEndDate().isBefore(LocalDate.now()) &&
                                     (p.getPromotionType() == PromotionType.ALL ||
                                             (p.getPromotionType() == PromotionType.CUSTOM &&
