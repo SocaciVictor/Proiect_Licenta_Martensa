@@ -24,7 +24,6 @@ public class StripeServiceImpl {
     public StripeResponse checkoutProducts(StripeCheckoutRequest checkoutRequest) {
         Stripe.apiKey = secretKey;
 
-        // Construim linie per produs:
         List<SessionCreateParams.LineItem> lineItems = checkoutRequest.products().stream()
                 .map(product -> SessionCreateParams.LineItem.builder()
                         .setQuantity(product.quantity())
@@ -38,13 +37,11 @@ public class StripeServiceImpl {
                         .build())
                 .toList();
 
-        // Construim lista de ProductQuantity pentru metadata
         List<ProductQuantity> productQuantities = checkoutRequest.products().stream()
                 .map(p -> new ProductQuantity(p.productId(), (int) p.quantity().longValue()))
                 .toList();
 
         try {
-            // Metadata pentru intent
             String productsJson = objectMapper.writeValueAsString(productQuantities);
 
             SessionCreateParams params = SessionCreateParams.builder()

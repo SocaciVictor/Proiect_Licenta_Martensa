@@ -69,7 +69,6 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .toList();
 
-        // 👉 Totalul corect
         BigDecimal total = items.stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
