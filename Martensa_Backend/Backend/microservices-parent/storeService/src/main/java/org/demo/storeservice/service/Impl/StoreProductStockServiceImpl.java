@@ -1,8 +1,9 @@
-package org.demo.storeservice.service.impl;
+package org.demo.storeservice.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.storeservice.dto.StoreProductStockDto;
 import org.demo.storeservice.dto.request.CreateOrUpdateStockRequest;
+import org.demo.storeservice.dto.response.MissingStockDto;
 import org.demo.storeservice.exception.StockNotFoundException;
 import org.demo.storeservice.exception.StoreNotFoundException;
 import org.demo.storeservice.mapper.StoreProductStockMapper;
@@ -14,6 +15,9 @@ import org.demo.storeservice.service.StoreProductStockService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,15 +32,25 @@ public class StoreProductStockServiceImpl implements StoreProductStockService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StockNotFoundException("Store not found"));
 
-        StoreProductStock stock = stockRepository.findByStoreIdAndProductId(storeId, request.productId())
-                .orElse(StoreProductStock.builder()
-                        .store(store)
-                        .productId(request.productId())
-                        .build());
+        Optional<StoreProductStock> optionalStock = stockRepository.findByStoreIdAndProductId(storeId, request.productId());
 
-        stock.setQuantity(request.quantity()+stock.getQuantity());
-        return mapper.toDto(stockRepository.save(stock));
+        StoreProductStock stock;
+
+        if (optionalStock.isPresent()) {
+            stock = optionalStock.get();
+            stock.setQuantity(stock.getQuantity() + request.quantity());
+        } else {
+            stock = StoreProductStock.builder()
+                    .store(store)
+                    .productId(request.productId())
+                    .quantity(request.quantity())
+                    .build();
+        }
+
+        StoreProductStock saved = stockRepository.save(stock);
+        return mapper.toDto(saved);
     }
+
 
     @Override
     public StoreProductStockDto getStock(Long storeId, Long productId) {
@@ -75,5 +89,19 @@ public class StoreProductStockServiceImpl implements StoreProductStockService {
         stock.setQuantity(stock.getQuantity() - quantity);
         stockRepository.save(stock);
     }
+
+    @Override
+    public List<MissingStockDto> checkProductsInStock(Long storeId, List<Long> productIds) {
+        List<StoreProductStock> stockList = stockRepository.findAllByStoreIdAndProductIdIn(storeId, productIds);
+
+        Map<Long, Integer> stockMap = stockList.stream()
+                .collect(Collectors.toMap(StoreProductStock::getProductId, StoreProductStock::getQuantity));
+
+        return productIds.stream()
+                .filter(pid -> !stockMap.containsKey(pid) || stockMap.get(pid) <= 0)
+                .map(pid -> new MissingStockDto(pid, "Produsul cu ID-ul " + pid + " nu este în stoc la acest magazin."))
+                .toList();
+    }
+
 
 }

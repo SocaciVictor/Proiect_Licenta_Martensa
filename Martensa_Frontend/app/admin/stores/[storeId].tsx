@@ -47,7 +47,6 @@ export default function AdminStoreStockScreen() {
     }
   };
 
-  // Fetch stock
   const fetchStock = async () => {
     if (storeIdNumber === undefined) return;
     try {

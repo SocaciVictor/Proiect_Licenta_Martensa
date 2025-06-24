@@ -3,6 +3,8 @@ package org.demo.storeservice.controller;
 import lombok.RequiredArgsConstructor;
 import org.demo.storeservice.dto.StoreProductStockDto;
 import org.demo.storeservice.dto.request.CreateOrUpdateStockRequest;
+import org.demo.storeservice.dto.request.StockCheckRequest;
+import org.demo.storeservice.dto.response.MissingStockDto;
 import org.demo.storeservice.service.StoreProductStockService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +48,15 @@ public class StockController {
         stockService.decreaseStock(storeId, productId, quantity);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/check")
+    public ResponseEntity<List<MissingStockDto>> checkStock(
+            @PathVariable Long storeId,
+            @RequestBody StockCheckRequest request
+    ) {
+        List<MissingStockDto> missing = stockService.checkProductsInStock(storeId, request.productIds());
+        return ResponseEntity.ok(missing);
+    }
+
 
 }

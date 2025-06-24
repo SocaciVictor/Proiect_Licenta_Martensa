@@ -9,3 +9,7 @@ const apiClientNoAuth = axios.create({
 // fără interceptor → NU pune Authorization
 
 export default apiClientNoAuth;
+//172.20.10.5
+//192.168.1.134
+//10.216.100.21
+//

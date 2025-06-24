@@ -23,12 +23,14 @@ spring:
               - "http://localhost:8093"
               - "http://192.168.1.13:19006"            # IP-ul local al PC-ului, ex: 192.168.1.7
               - "http://192.168.1.13:19000"            # Pentru Expo Go (fizic)
-              - "http://192.168.1.13:19006"       # Dacă accesezi prin IP public (cu port forwarding)
+              - "http://192.168.1.13:19006"
               - "http://192.168.1.131:19006"
               - "http://192.168.1.131:19000"
-              - "http://192.168.1.1:19006"       # Dacă accesezi prin IP public (cu port forwarding)
+              - "http://192.168.1.1:19006"
               - "http://192.168.1.1:19006"
               - "http://192.168.1.1:19000"
+              - "http://172.20.10.5:19006"
+              - "http://172.20.10.5:19000"
             allowed-methods:
               - GET
               - POST
@@ -38,7 +40,7 @@ spring:
             allowed-headers:
               - "*"
             allow-credentials: true
-            max-age: 3600                   # cache preflight timp de 1 oră
+            max-age: 3600
 
       routes:
         - id: user-service
@@ -97,7 +99,6 @@ spring:
                 requiredRoles:
                   - ROLE_ADMIN
                 securedMethods:
-                  - POST
                   - PUT
                   - DELETE
 

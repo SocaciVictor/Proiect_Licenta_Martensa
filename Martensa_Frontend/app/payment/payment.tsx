@@ -83,7 +83,7 @@ export default function PaymentScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-4 pt-6">
+    <SafeAreaView className="flex-1 bg-white px-4 justify-center items-center">
       <Text className="text-xl font-bold mb-4">Finalizare plată</Text>
 
       <Text className="mb-2">
@@ -101,7 +101,7 @@ export default function PaymentScreen() {
 
       {orderId && (
         <TouchableOpacity
-          className="bg-blue-600 py-3 rounded-lg mt-4"
+          className="bg-blue-600 py-3 rounded-sm mt-4 w-full"
           onPress={handleCheckPaymentStatus}
         >
           <Text className="text-white text-center font-bold text-base">

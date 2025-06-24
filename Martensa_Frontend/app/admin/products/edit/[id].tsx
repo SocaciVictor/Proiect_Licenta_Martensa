@@ -2,10 +2,13 @@ import {
   ProductDetailsResponse,
   ProductRequest,
 } from "@/modules/auth/types/auth";
+import { useCategories } from "@/modules/products/hooks/useCategories";
 import apiClient from "@/services/apiClient";
+import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   Text,
@@ -14,43 +17,66 @@ import {
 } from "react-native";
 
 export default function EditProductScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { categories, loading: categoriesLoading } = useCategories();
 
-  const [form, setForm] = useState<ProductRequest>({
+  // 🧠 Folosim string-uri pentru a permite ".", inclusiv pe iPhone
+  const [form, setForm] = useState<Record<keyof ProductRequest, string>>({
     name: "",
     description: "",
     brand: "",
-    price: 0,
-    discountPrice: 0,
+    price: "",
+    discountPrice: "",
     imageUrl: "",
     barcode: "",
     ingredients: "",
     nutritionalValues: "",
     disclaimer: "",
-    alcoholPercentage: 0,
-    categoryId: 1,
+    alcoholPercentage: "",
+    categoryId: "0",
   });
+
+  const placeholders: Record<keyof ProductRequest, string> = {
+    name: "Denumirea produsului",
+    description: "Descriere",
+    brand: "Brand",
+    price: "Preț (ex: 12.99)",
+    discountPrice: "Discount (nu se afișează)",
+    imageUrl: "URL imagine produs",
+    barcode: "Cod de bare",
+    ingredients: "Ingrediente",
+    nutritionalValues: "Valori nutriționale",
+    disclaimer: "Avertismente (opțional)",
+    alcoholPercentage: "Alcool % (ex: 0.0)",
+    categoryId: "Categorie",
+  };
+
+  const handleChange = (field: keyof ProductRequest, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const fetchProduct = async () => {
     try {
-      const response = await apiClient.get<ProductDetailsResponse>(
+      const { data } = await apiClient.get<ProductDetailsResponse>(
         `/products/${id}`
       );
-      const p = response.data;
+
+      const cat = categories.find((c) => c.name === data.categoryName);
+
       setForm({
-        name: p.name,
-        description: p.description,
-        brand: p.brand,
-        price: Number(p.price),
-        discountPrice: Number(p.discountPrice),
-        imageUrl: p.imageUrl,
-        barcode: p.barcode,
-        ingredients: p.ingredients,
-        nutritionalValues: p.nutritionalValues,
-        disclaimer: p.disclaimer,
-        alcoholPercentage: p.alcoholPercentage ?? 0,
-        categoryId: 1, // tu completezi corect dacă vrei din p.categoryId dacă ai
+        name: data.name,
+        description: data.description,
+        brand: data.brand,
+        price: data.price.toString(),
+        discountPrice: data.discountPrice?.toString() ?? "0",
+        imageUrl: data.imageUrl,
+        barcode: data.barcode,
+        ingredients: data.ingredients,
+        nutritionalValues: data.nutritionalValues,
+        disclaimer: data.disclaimer,
+        alcoholPercentage: data.alcoholPercentage?.toString() ?? "0",
+        categoryId: cat ? cat.id.toString() : "0",
       });
     } catch (err) {
       console.error("Eroare la fetch product:", err);
@@ -58,19 +84,24 @@ export default function EditProductScreen() {
     }
   };
 
-  const handleChange = (field: keyof ProductRequest, value: string) => {
-    setForm({ ...form, [field]: value });
-  };
+  useEffect(() => {
+    if (id && !categoriesLoading) fetchProduct();
+  }, [id, categoriesLoading]);
 
   const handleSubmit = async () => {
     try {
       await apiClient.put(`/products/${id}`, {
         ...form,
-        price: Number(form.price),
-        discountPrice: Number(form.discountPrice),
-        alcoholPercentage: Number(form.alcoholPercentage),
-        categoryId: Number(form.categoryId),
+        price: parseFloat(form.price.replace(",", ".")) || 0,
+        discountPrice:
+          form.discountPrice.trim() === ""
+            ? null
+            : parseFloat(form.discountPrice.replace(",", ".")),
+        alcoholPercentage:
+          parseFloat(form.alcoholPercentage.replace(",", ".")) || 0,
+        categoryId: parseInt(form.categoryId),
       });
+
       Alert.alert("Succes", "Produsul a fost actualizat.");
       router.replace("/admin/products");
     } catch (err) {
@@ -79,38 +110,57 @@ export default function EditProductScreen() {
     }
   };
 
-  useEffect(() => {
-    if (id) fetchProduct();
-  }, [id]);
-
   return (
     <ScrollView className="flex-1 bg-white p-4">
       <Text className="text-xl font-bold mb-4">Editează produs</Text>
 
-      {[
-        "name",
-        "description",
-        "brand",
-        "price",
-        "discountPrice",
-        "imageUrl",
-        "barcode",
-        "ingredients",
-        "nutritionalValues",
-        "disclaimer",
-        "alcoholPercentage",
-        "categoryId",
-      ].map((field) => (
+      {(
+        [
+          "name",
+          "description",
+          "brand",
+          "price",
+          // "discountPrice", ❌ îl ascundem din UI
+          "imageUrl",
+          "barcode",
+          "ingredients",
+          "nutritionalValues",
+          "disclaimer",
+          "alcoholPercentage",
+        ] as (keyof ProductRequest)[]
+      ).map((field) => (
         <TextInput
           key={field}
-          placeholder={field}
-          value={form[field as keyof ProductRequest]?.toString() ?? ""}
-          onChangeText={(text) =>
-            handleChange(field as keyof ProductRequest, text)
+          placeholder={placeholders[field]}
+          keyboardType={
+            ["price", "alcoholPercentage"].includes(field)
+              ? "default" // ✅ permite punct pe iPhone
+              : "default"
           }
+          value={form[field]}
+          onChangeText={(text) => handleChange(field, text)}
           className="border border-gray-300 rounded-md px-4 py-2 mb-3"
         />
       ))}
+
+      {/* Picker categorie */}
+      <Text className="mb-1 font-medium">Categorie</Text>
+      {categoriesLoading ? (
+        <ActivityIndicator style={{ marginBottom: 16 }} />
+      ) : (
+        <Picker
+          selectedValue={parseInt(form.categoryId)}
+          onValueChange={(value) =>
+            setForm((prev) => ({ ...prev, categoryId: value.toString() }))
+          }
+          style={{ marginBottom: 16 }}
+        >
+          <Picker.Item label="Selectează categoria" value={0} />
+          {categories.map((c) => (
+            <Picker.Item key={c.id} label={c.name} value={c.id} />
+          ))}
+        </Picker>
+      )}
 
       <TouchableOpacity
         onPress={handleSubmit}

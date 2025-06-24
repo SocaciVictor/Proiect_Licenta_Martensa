@@ -1,25 +1,32 @@
-// modules/products/components/CategoryGridItem.tsx
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity } from "react-native";
 
-interface Props {
+type Props = {
   name: string;
-  imageUrl: string;
+  imageUrl?: string;
   onPress: () => void;
-}
+};
 
 export default function CategoryGridItem({ name, imageUrl, onPress }: Props) {
   return (
-    <TouchableOpacity onPress={onPress} className="w-1/2 p-2">
-      <View className="bg-white rounded-lg items-center p-3 shadow-sm border border-gray-100">
+    <TouchableOpacity
+      onPress={onPress}
+      className="w-[47%] h-40 bg-gray-100 rounded-xl mb-3 items-center justify-center px-2"
+      style={{ marginBottom: 12 }}
+    >
+      {imageUrl && (
         <Image
           source={{ uri: imageUrl }}
-          className="w-20 h-20 mb-2"
+          className="w-16 h-16 mb-2"
           resizeMode="contain"
         />
-        <Text className="text-center text-sm font-medium text-gray-800">
-          {name}
-        </Text>
-      </View>
+      )}
+      <Text
+        className="text-center text-sm font-semibold text-gray-800"
+        numberOfLines={2}
+        ellipsizeMode="tail"
+      >
+        {name}
+      </Text>
     </TouchableOpacity>
   );
 }

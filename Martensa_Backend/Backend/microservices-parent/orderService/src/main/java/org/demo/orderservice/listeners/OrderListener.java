@@ -48,7 +48,6 @@ public class OrderListener {
                                 order.getId());
                     }
 
-                    // Loyalty Points Event
                     loyaltyPointsPublisher.sendLoyaltyPointsEvent(order.getUserId(), order.getTotalAmount());
                     log.info("🏅 LoyaltyPointsEvent sent for userId={} amount={}", order.getUserId(), order.getTotalAmount());
 

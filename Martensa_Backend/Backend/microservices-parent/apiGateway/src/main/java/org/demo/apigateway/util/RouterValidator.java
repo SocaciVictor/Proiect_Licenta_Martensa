@@ -17,13 +17,15 @@ public class RouterValidator {
             "/auth/login",
             "/auth/validate",
             "/auth/token",
-            "/payments/**"
+            "/payments/**",
+            "/stores/**/stock/check"
     );
 
     private static final List<String> openGetEndpoints = List.of(
             "/products/**",
             "/categories/**",
-            "/promotions/**"
+            "/promotions/**",
+            "/stores/**/stock/check"
     );
 
     public Predicate<ServerHttpRequest> isSecured = request -> {

@@ -1,7 +1,7 @@
 import { UserSummaryResponse } from "@/modules/auth/types/auth";
 import apiClient from "@/services/apiClient";
 import { useEffect, useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 
 export default function AdminUsersScreen() {
   const [users, setUsers] = useState<UserSummaryResponse[]>([]);
@@ -51,12 +51,12 @@ export default function AdminUsersScreen() {
               </Text>
               <Text className="text-gray-600">{item.email}</Text>
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => handleDeleteUser(item.id)}
               className="bg-red-500 px-3 py-1 rounded"
             >
               <Text className="text-white">Șterge</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         )}
       />

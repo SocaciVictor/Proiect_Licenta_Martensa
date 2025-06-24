@@ -8,7 +8,7 @@ export type PromotionDto = {
   title: string;
   description: string;
   discountPercentage: number;
-  startDate: string; // sau Date, depinde cum primești
+  startDate: string;
   endDate: string;
   promotionType: string;
   productIds: number[];

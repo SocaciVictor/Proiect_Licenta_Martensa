@@ -1,3 +1,4 @@
+import { useRefreshStore } from "@/hooks/useRefreshStore";
 import { useUserProfile } from "@/modules/auth/hooks/useUserProfile";
 import { useAuthStore } from "@/modules/auth/store/useAuthStore";
 import BenefitPromotionCard from "@/modules/benefits/components/BenefitProductCard";
@@ -12,6 +13,9 @@ export default function BenefitsScreen() {
   const points = profile?.loyaltyCard?.points ?? 0;
   const authenticated = useAuthStore((state) => state.authenticated);
   const userId = useAuthStore((state) => state.userId);
+  const incrementRefreshVersion = useRefreshStore(
+    (state) => state.incrementRefreshVersion
+  );
 
   const {
     availablePromotions,
@@ -82,7 +86,11 @@ export default function BenefitsScreen() {
 
       <View className="flex-col space-y-3 mb-6">
         {activatedPromotions.map((promotion) => (
-          <BenefitPromotionCard key={promotion.id} promotion={promotion} />
+          <BenefitPromotionCard
+            key={promotion.id}
+            promotion={promotion}
+            onActivateSuccess={incrementRefreshVersion}
+          />
         ))}
       </View>
 

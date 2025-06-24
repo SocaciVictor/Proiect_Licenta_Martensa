@@ -4,7 +4,7 @@ import {
 } from "@/modules/auth/types/auth";
 import { useCartStore } from "@/modules/cart/store/useCartStore";
 import apiClientNoAuth from "@/services/apiClientNoAuth";
-import { showToast } from "@/utils/toast"; // dacă vrei să vezi mesajul "Produs adăugat în coș"
+import { showToast } from "@/utils/toast";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -44,7 +44,7 @@ export default function ProductPromoCard({ product, onPress }: Props) {
 
   if (loading || !details) {
     return (
-      <View className="w-[48%] h-64 bg-white rounded-lg border border-gray-200 p-2 items-center justify-center">
+      <View className="w-[48%] h-64 bg-white rounded-lg border border-gray-200 p-2 items-center justify-center my-2">
         <ActivityIndicator size="small" color="#28a745" />
       </View>
     );
@@ -57,34 +57,36 @@ export default function ProductPromoCard({ product, onPress }: Props) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
-      className="w-[48%] bg-white rounded-lg border border-gray-200 p-2 relative"
+      className="w-[48%] bg-white rounded-lg border border-gray-200 p-2 relative my-2"
     >
-      {/* Badge reducere dacă există */}
+      {/* 🔴 Badge reducere peste imagine */}
       {hasDiscount && (
-        <View className="absolute top-2 left-2 bg-red-500 px-2 py-1 rounded">
-          {/* poți calcula % dacă vrei */}
+        <View className="absolute top-2 left-2 bg-red-600 px-2 py-1 rounded z-10">
           <Text className="text-xs text-white font-bold">Reducere</Text>
         </View>
       )}
 
+      {/* Imagine produs */}
       <Image
         source={{ uri: details.imageUrl }}
-        className="w-full h-28 object-contain rounded"
+        className="w-full h-28 rounded"
         resizeMode="contain"
       />
 
+      {/* Nume produs */}
       <Text className="text-sm font-semibold mt-2 text-black" numberOfLines={2}>
         {details.name}
       </Text>
 
+      {/* Prețuri */}
       <View className="mt-1">
-        {hasDiscount ? (
+        {hasDiscount && details.discountPrice ? (
           <>
             <Text className="text-sm text-gray-500 line-through">
               {details.price.toFixed(2)} Lei
             </Text>
             <Text className="text-lg font-extrabold text-[#28a745]">
-              {details.discountPrice!.toFixed(2)} Lei
+              {details.discountPrice.toFixed(2)} Lei
             </Text>
           </>
         ) : (

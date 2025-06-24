@@ -7,15 +7,20 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   promotion: PromotionDto;
+  onActivateSuccess?: () => void; // ✅ adăugat
 };
 
-export default function BenefitPromotionCard({ promotion }: Props) {
+export default function BenefitPromotionCard({
+  promotion,
+  onActivateSuccess,
+}: Props) {
   const user = useAuthStore((state) => state.user);
   const points = user?.loyaltyCard?.points ?? 0;
 
   const incrementRefreshVersion = useRefreshStore(
     (state) => state.incrementRefreshVersion
   );
+
   const [activated, setActivated] = useState(
     promotion.userIds?.includes(user?.id ?? -1)
   );
@@ -26,8 +31,11 @@ export default function BenefitPromotionCard({ promotion }: Props) {
         params: { userId: user?.id },
       });
       setActivated(true);
-
       incrementRefreshVersion();
+
+      if (onActivateSuccess) {
+        onActivateSuccess();
+      }
     } catch (err) {
       console.error("Eroare la activarea promoției:", err);
     }
