@@ -24,12 +24,10 @@ export default function StoreMapScreen() {
     string | null
   >(null);
 
-  // ✅ Actualizăm lista de ID-uri din coș
   useEffect(() => {
     setCartProductIds(products.map((p) => p.id));
   }, [products]);
 
-  // 🔁 Fetch locații magazine
   useEffect(() => {
     fetchStores();
   }, []);
@@ -73,7 +71,6 @@ export default function StoreMapScreen() {
         return;
       }
 
-      // 🔁 Curățăm mesajul dacă toate sunt disponibile
       setMissingProductsMessage(null);
       router.push("/payment/payment");
     } catch (error) {
@@ -119,7 +116,6 @@ export default function StoreMapScreen() {
         })}
       </MapView>
 
-      {/* 🔙 Buton Back */}
       <TouchableOpacity
         className="absolute left-4 bg-white/90 rounded-full p-2 z-50 shadow-md"
         style={{ top: insets.top + 10 }}
@@ -128,7 +124,6 @@ export default function StoreMapScreen() {
         <Ionicons name="arrow-back-outline" size={24} color="#000" />
       </TouchableOpacity>
 
-      {/* 🧱 Secțiune dedesubt pentru erori și buton */}
       <View className="absolute bottom-5 left-4 right-4 px-4">
         {missingProductsMessage && (
           <View className="bg-red-100 border border-red-400 p-3 rounded-lg mb-3">

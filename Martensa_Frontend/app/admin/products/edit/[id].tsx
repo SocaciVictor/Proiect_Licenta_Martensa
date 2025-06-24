@@ -4,16 +4,17 @@ import {
 } from "@/modules/auth/types/auth";
 import { useCategories } from "@/modules/products/hooks/useCategories";
 import apiClient from "@/services/apiClient";
-import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function EditProductScreen() {
@@ -21,7 +22,6 @@ export default function EditProductScreen() {
   const router = useRouter();
   const { categories, loading: categoriesLoading } = useCategories();
 
-  // 🧠 Folosim string-uri pentru a permite ".", inclusiv pe iPhone
   const [form, setForm] = useState<Record<keyof ProductRequest, string>>({
     name: "",
     description: "",
@@ -36,6 +36,8 @@ export default function EditProductScreen() {
     alcoholPercentage: "",
     categoryId: "0",
   });
+
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
 
   const placeholders: Record<keyof ProductRequest, string> = {
     name: "Denumirea produsului",
@@ -61,7 +63,6 @@ export default function EditProductScreen() {
       const { data } = await apiClient.get<ProductDetailsResponse>(
         `/products/${id}`
       );
-
       const cat = categories.find((c) => c.name === data.categoryName);
 
       setForm({
@@ -69,13 +70,13 @@ export default function EditProductScreen() {
         description: data.description,
         brand: data.brand,
         price: data.price.toString(),
-        discountPrice: data.discountPrice?.toString() ?? "0",
+        discountPrice: data.discountPrice?.toString() ?? "",
         imageUrl: data.imageUrl,
         barcode: data.barcode,
         ingredients: data.ingredients,
         nutritionalValues: data.nutritionalValues,
         disclaimer: data.disclaimer,
-        alcoholPercentage: data.alcoholPercentage?.toString() ?? "0",
+        alcoholPercentage: data.alcoholPercentage?.toString() ?? "",
         categoryId: cat ? cat.id.toString() : "0",
       });
     } catch (err) {
@@ -110,6 +111,10 @@ export default function EditProductScreen() {
     }
   };
 
+  const selectedCategory = categories.find(
+    (c) => c.id === parseInt(form.categoryId)
+  );
+
   return (
     <ScrollView className="flex-1 bg-white p-4">
       <Text className="text-xl font-bold mb-4">Editează produs</Text>
@@ -120,7 +125,6 @@ export default function EditProductScreen() {
           "description",
           "brand",
           "price",
-          // "discountPrice", ❌ îl ascundem din UI
           "imageUrl",
           "barcode",
           "ingredients",
@@ -132,34 +136,57 @@ export default function EditProductScreen() {
         <TextInput
           key={field}
           placeholder={placeholders[field]}
-          keyboardType={
-            ["price", "alcoholPercentage"].includes(field)
-              ? "default" // ✅ permite punct pe iPhone
-              : "default"
-          }
           value={form[field]}
           onChangeText={(text) => handleChange(field, text)}
           className="border border-gray-300 rounded-md px-4 py-2 mb-3"
         />
       ))}
 
-      {/* Picker categorie */}
+      {/* Selector pentru categorie */}
       <Text className="mb-1 font-medium">Categorie</Text>
       {categoriesLoading ? (
         <ActivityIndicator style={{ marginBottom: 16 }} />
       ) : (
-        <Picker
-          selectedValue={parseInt(form.categoryId)}
-          onValueChange={(value) =>
-            setForm((prev) => ({ ...prev, categoryId: value.toString() }))
-          }
-          style={{ marginBottom: 16 }}
-        >
-          <Picker.Item label="Selectează categoria" value={0} />
-          {categories.map((c) => (
-            <Picker.Item key={c.id} label={c.name} value={c.id} />
-          ))}
-        </Picker>
+        <>
+          <TouchableOpacity
+            onPress={() => setCategoryModalVisible(true)}
+            className="border border-gray-300 rounded-md px-4 py-3 mb-4"
+          >
+            <Text>{selectedCategory?.name || "Selectează categoria"}</Text>
+          </TouchableOpacity>
+
+          <Modal
+            visible={categoryModalVisible}
+            animationType="slide"
+            transparent={true}
+          >
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <View className="bg-white w-3/4 rounded-lg p-4">
+                {categories.map((c) => (
+                  <TouchableOpacity
+                    key={c.id}
+                    onPress={() => {
+                      setForm((prev) => ({
+                        ...prev,
+                        categoryId: c.id.toString(),
+                      }));
+                      setCategoryModalVisible(false);
+                    }}
+                    className="py-2"
+                  >
+                    <Text>{c.name}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  className="mt-4"
+                  onPress={() => setCategoryModalVisible(false)}
+                >
+                  <Text className="text-red-500 text-center">Închide</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </>
       )}
 
       <TouchableOpacity

@@ -1,16 +1,18 @@
 import { ProductRequest } from "@/modules/auth/types/auth";
 import { useCategories } from "@/modules/products/hooks/useCategories";
 import apiClient from "@/services/apiClient";
-import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
+  Modal,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function CreateProductScreen() {
@@ -31,6 +33,12 @@ export default function CreateProductScreen() {
     alcoholPercentage: "",
     categoryId: "0",
   });
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const selectedCategory = categories.find(
+    (c) => c.id.toString() === form.categoryId
+  );
 
   const placeholders: Record<keyof ProductRequest, string> = {
     name: "Denumirea produsului",
@@ -83,6 +91,7 @@ export default function CreateProductScreen() {
           "description",
           "brand",
           "price",
+          "discountPrice",
           "imageUrl",
           "barcode",
           "ingredients",
@@ -95,8 +104,8 @@ export default function CreateProductScreen() {
           key={field}
           placeholder={placeholders[field]}
           keyboardType={
-            ["price", "alcoholPercentage"].includes(field)
-              ? "default" // ✅ tastatură completă cu punct pe iPhone
+            ["price", "discountPrice", "alcoholPercentage"].includes(field)
+              ? "decimal-pad"
               : "default"
           }
           value={form[field]}
@@ -105,28 +114,62 @@ export default function CreateProductScreen() {
         />
       ))}
 
-      {/* Picker categorie */}
       <Text className="mb-1 font-medium">Categorie</Text>
+
       {categoriesLoading ? (
-        <ActivityIndicator style={{ marginBottom: 16 }} />
+        <ActivityIndicator />
       ) : (
-        <Picker
-          selectedValue={parseInt(form.categoryId)}
-          onValueChange={(value) =>
-            setForm((prev) => ({ ...prev, categoryId: value.toString() }))
-          }
-          style={{ marginBottom: 16 }}
-        >
-          <Picker.Item label="Selectează categoria" value={0} />
-          {categories.map((c) => (
-            <Picker.Item key={c.id} label={c.name} value={c.id} />
-          ))}
-        </Picker>
+        <>
+          <TouchableOpacity
+            className="border border-gray-300 rounded-md px-4 py-2 mb-4"
+            onPress={() => setModalVisible(true)}
+          >
+            <Text>
+              {selectedCategory
+                ? selectedCategory.name
+                : "Selectează categoria"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Modal select categorie */}
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View className="flex-1 justify-center bg-black/50">
+              <View className="bg-white mx-6 rounded-lg p-4 max-h-[70%]">
+                <Text className="text-lg font-bold mb-4">
+                  Alege o categorie
+                </Text>
+                <FlatList
+                  data={categories}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      className="py-2 border-b border-gray-200"
+                      onPress={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          categoryId: item.id.toString(),
+                        }));
+                        setModalVisible(false);
+                      }}
+                    >
+                      <Text>{item.name}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </View>
+          </Modal>
+        </>
       )}
 
       <TouchableOpacity
         onPress={handleSubmit}
-        className="bg-green-600 py-3 rounded-lg"
+        className="bg-green-600 py-3 rounded-lg mt-4"
       >
         <Text className="text-white text-center font-semibold">Adaugă</Text>
       </TouchableOpacity>
